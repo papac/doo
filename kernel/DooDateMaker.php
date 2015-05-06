@@ -24,13 +24,14 @@
 
 		function __construct($timestanp = null, $local = null)
 		{
+
 			if($timestanp !== null)
 			{
 
 				if(is_string($timestanp))
 				{
 
-					$local = $timestanp;
+					$this->local = $timestanp;
 					$initDate = \getdate();
 
 				}
@@ -49,19 +50,87 @@
 
 			}
 
-			$this->local = $local !== null ? $local : "en_EN";
-
-			$this->seconds = $initDate['seconds'];
-			$this->minutes = $initDate['minutes'];
-			$this->hours = ($initDate['hours'] === 0 ? 24 : $initDate['year'] * 2) - ($this->local === 'fr_FR' ? 2 : 0);
-
-
-			$this->dayOfWeek = $initDate['wday'];
-			$this->dayOfYear = $initDate['yday'] - 1;
-			$this->dayOfMonth = $initDate["mday"] - 1;
-			$this->year = $initDate['year'];
 			$this->timestanp = $initDate[0];
-			$this->monthOfYear = $initDate['mon'];
+
+			if($this->local === 'fr_FR')
+			{
+
+				$this->seconds = $initDate['seconds'];
+				$this->minutes = $initDate['minutes'];
+				$this->hours = $initDate['hours'];
+
+				$this->dayOfWeek = $initDate['wday'];
+				$this->dayOfYear = $initDate['yday'];
+				$this->dayOfMonth = $initDate["mday"];
+				$this->year = $initDate['year'];
+				$this->monthOfYear = $initDate['mon'];
+
+			}
+
+			elseif($this->local === 'es_ES')
+			{
+
+				$this->seconds = $initDate['seconds'];
+				$this->minutes = $initDate['minutes'];
+				$this->hours = $initDate['hours'];
+
+				$this->dayOfWeek = $initDate['wday'];
+				$this->dayOfYear = $initDate['yday'];
+				$this->dayOfMonth = $initDate["mday"];
+				$this->year = $initDate['year'];
+				$this->timestanp = $initDate[0];
+				$this->monthOfYear = $initDate['mon'];
+
+			}
+
+			elseif($this->local === "en_EN")
+			{
+
+				$this->seconds = $initDate['seconds'];
+				$this->minutes = $initDate['minutes'];
+				$this->hours = $initDate['hours'];
+
+				$this->dayOfWeek = $initDate['wday'];
+				$this->dayOfYear = $initDate['yday'];
+				$this->dayOfMonth = $initDate["mday"];
+				$this->year = $initDate['year'];
+				$this->monthOfYear = $initDate['mon'];
+
+			}
+
+			elseif($this->local === "ci_CI")
+			{
+
+				$this->dayOfWeek = $initDate['wday'];
+				$this->dayOfYear = $initDate['yday'];
+
+				$tmp = date_create('Africa/Abidjan');
+				$tmp = (array) $tmp;
+				$tmp = $tmp["date"];
+
+
+				$part = explode(' ', $tmp);
+				$partTime = explode(':', $part[1]);
+				$partDate = explode('-', $part[0]);
+
+				$initDate = [
+					"seconds" => (int) $partTime[2],
+					"minutes" => (int) $partTime[1],
+					"hours" => (int) $partTime[0],
+					"mday" => (int) $partDate[2],
+					"mon" => (int) $partDate[1],
+					"year" => (int) $partDate[0]
+				];
+
+				$this->seconds = $initDate['seconds'];
+				$this->minutes = $initDate['minutes'];
+				$this->hours = $initDate['hours'];
+
+				$this->dayOfMonth = $initDate["mday"];
+				$this->year = $initDate['year'];
+				$this->monthOfYear = $initDate['mon'];
+
+			}
 
 		}
 
@@ -77,7 +146,10 @@
       }
 
     }
-
+		/**
+		* getDayName, fonction permetant de recuperer le nom litteral du jour
+		* @return string
+		*/
 		public function getDayName()
 		{
 			$day = [
@@ -95,8 +167,16 @@
 
 			];
 
-			if($this->local === 'fr_FR' || $this->local === 'es_ES')
+			if($this->local === 'fr_FR' || $this->local === 'es_ES' || $this->local === 'ci_CI')
 			{
+
+				if($this->local === 'ci_CI')
+				{
+
+						$this->local = "fr_FR";
+
+				}
+
 				$dayName = $day[$this->local][$this->dayOfWeek - 1];
 			}
 			elseif($this->local === 'en_EN')
@@ -161,8 +241,15 @@
 
 			];
 
-			if($this->local === 'fr_FR' || $this->local === 'es_ES')
+			if($this->local === 'fr_FR' || $this->local === 'es_ES' || $this->local === 'ci_CI')
 			{
+
+				if($this->local === 'ci_CI')
+				{
+
+						$this->local = 'fr_FR';
+
+				}
 
 				$monthName = $month[$this->local][$this->monthOfYear - 1];
 
@@ -178,6 +265,12 @@
 
 		}
 
+		/**
+		* format, fonction permettant de format des dates en fonction des besion
+		* @param string, formatage e.g: Y-m-d H:m:s
+		* @param fonction, fonction de rappel pouvant recuperer le resultat
+		* @return string, representant le date format
+		*/
 		public function format($format, $cb = null)
 		{
 
@@ -192,6 +285,12 @@
 
 		}
 
+
+		/**
+		*	addDay, fonction permetant d'ajouter des jours
+		* @param int, un timestanp
+		* @return DooDateMaker, avec l'ajout des jours
+		*/
 		public function addDay($dayNumber)
 		{
 
@@ -199,6 +298,11 @@
 
 		}
 
+		/**
+		*	addMonth, fonction permetant d'ajouter des mois
+		* @param int, un timestanp
+		* @return DooDateMaker, avec l'ajout des jours
+		*/
 		public function addMonth($monthNumbre)
 		{
 
