@@ -24,7 +24,7 @@
     */
     private static $bdd = null;
 
-    public static function init($sdn, $cb)
+    public static function init($sdn, $cb = null)
     {
 
       self::$bdd = Doodb::connection($sdn, $cb);

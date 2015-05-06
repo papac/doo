@@ -4,10 +4,10 @@
   namespace Doo;
 
   class Doodb {
-    
+
     /**
     * creation d'un connection PDO
-    * @param array 
+    * @param array
     * @param callback function
     * @return PDO || NULL
     * e.g mysql://username:password@hostname:port/dbname
@@ -24,7 +24,7 @@
         $port = isset($hostConfig[1]) ? $hostConfig[1] : '';
         $user = $userConfig[0];
         $password = isset($userConfig[1]) ? $userConfig[1] : '';
-        
+
         $dbname = $tmp[3];
         $engine = $tmp[0];
 
@@ -44,7 +44,7 @@
 
       }catch(\Exception $e){
         # gestion d'exception sur la chaine de connection PDO
-        
+
         if($cb !== null)
         {
           $cb($e, $connectionData);
@@ -60,6 +60,7 @@
       }
 
       # Retour de l'objet PDO
+
       return $bdd;
 
     }
