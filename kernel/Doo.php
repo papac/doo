@@ -12,6 +12,12 @@
     const SUCESS =  "<span style=\"color:red\">SUCESS</span>";
     const FAILURE =  "<span style=\"color:red\">FAILURE</span>";
 
+    # configuration du jeu de caractere
+    private static $charset = null;
+
+    # Le mode de recuperation de des
+    private static $modeDeRecuperationDeDonnee = \PDO::FETCH_OBJ;
+
     /**
     * initialisation de la chaine de connection
     * e.g mysql://username:password@hostname:port/dbname
@@ -20,13 +26,39 @@
 
     public static function init($sdn, $cb)
     {
+
       self::$bdd = Doodb::connection($sdn, $cb);
+      if(self::$bdd !== null)
+      {
+        self::$bdd->exec("SET NAMES UTF8");
+      }
+
     }
 
-    public static function fetchMode($pdoFetchMode)
+    /**
+    * setCharset, permet de reinitialiser le jeux de caracter
+    * @param strting: encodage
+    * @return mixed
+    */
+
+    public static function setCharset($charset, $cb = null)
     {
-      var_dump($pdoFetchMode);
-      self::$bdd->setFetchMode($pdoFetchMode);
+
+      if(!is_string($charset)){
+        return $cb(new Exception('encodage non valide'));
+      }
+
+      self::$charset = $charset;
+
+      $cb(null);
+
+    }
+
+    public static function setFetchMode($pdoFetchMode)
+    {
+
+      self::$modeDeRecuperationDeDonnee = (int) $pdoFetchMode;
+
     }
 
     /**
@@ -96,6 +128,11 @@
 
       $req = self::$bdd->query($query);
 
+      if($self::$charset !== null)
+      {
+        $self::$bdd->exec("SET NAMES " . self::$charset);
+      }
+
       $err = self::getError(self::$bdd->errorInfo(), $query);
 
       if(is_bool($req)){
@@ -104,7 +141,7 @@
 
       }else{
 
-        $cb($err, $req->fetchAll(\PDO::FETCH_OBJ));
+        $cb($err, $req->fetchAll(self::$modeDeRecuperationDeDonnee));
 
       }
 
@@ -121,7 +158,9 @@
     public static function update($table, $fields, $where, $cb){
 
       $query = "UPDATE " . $table . " SET " . implode(", ", $fields) . " WHERE " . $where;
+
       self::$bdd->exec($query);
+
       $cb(self::getError(self::$bdd->errorInfo(), $query));
 
     }
