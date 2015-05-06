@@ -20,14 +20,18 @@
         $config = explode("@", $tmp[2]);
         $userConfig = explode(":", $config[0]);
         $hostConfig = explode(":", $config[1]);
+
         $host = $hostConfig[0];
         $port = isset($hostConfig[1]) ? $hostConfig[1] : '';
+        
         $user = $userConfig[0];
         $password = isset($userConfig[1]) ? $userConfig[1] : '';
 
         $dbname = $tmp[3];
         $engine = $tmp[0];
 
+
+        # create de l'apercu externe.
         $connectionData = [
           "engine" => $engine,
           "host" => $host,
@@ -47,6 +51,7 @@
 
         if($cb !== null)
         {
+          # is elle n'est pas null, execution de la fonction de rappel
           $cb($e, $connectionData);
         }
 
@@ -56,11 +61,11 @@
 
       if($cb !== null)
       {
+        # is elle n'est pas null, execution de la fonction de rappel
         $cb(null, $connectionData);
       }
 
       # Retour de l'objet PDO
-
       return $bdd;
 
     }

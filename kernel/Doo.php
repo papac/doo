@@ -18,12 +18,16 @@
     # Le mode de recuperation de des
     private static $modeDeRecuperationDeDonnee = \PDO::FETCH_OBJ;
 
+    # Object de connection PDO
+    private static $bdd = null;
+
+    # taille du fichier
+    private static $fileSize = 2000000;
+
     /**
     * initialisation de la chaine de connection
     * e.g mysql://username:password@hostname:port/dbname
     */
-    private static $bdd = null;
-
     public static function init($sdn, $cb = null)
     {
 
@@ -221,8 +225,29 @@
 
     }
 
-    public static function uploadFile($file, $extension = null, $cb = null)
+    /**
+    * uploadFile, fonction permettant d'uploaded un fichier.
+    * @param array, un tableau comportant les inforamtio sur le fichier a uploader
+    * provenant de la variable $_FILES.
+    * @param array, liste des extensions valides.
+    * @param string[$uploadedDirectory = null], chemin du repretoire dans lequelle le fichier toi etre uploader.
+    * @param fonction[$cb = null], fonction de rappel pour recuperer les erreurs.
+    */
+
+    public static function uploadFile($file, array $extension, $upLoadedDirectory = null, $cb = null)
     {
+
+      if($uploadedDirectory !== null)
+      {
+
+        if(!is_string($uploadedDirectory))
+        {
+
+          $cb = $uploadedDirectory;
+
+        }
+
+      }
 
       if(is_string($extension))
       {
@@ -233,13 +258,29 @@
         $cb = $extension;
       }
 
+      # Si le fichier est bien dans le repertoir tmp de PHP
       if(is_uploaded_file($file["tmp_name"]))
       {
 
+        if($uploadedDirectory === null)
+        {
+
+          if(!is_dir('/uploaded'))
+          {
+
+            mkdir('/uploaded', 0777);
+
+          }
+
+          $uploadedDirectory = '/uploaded/';
+
+        }
+
+        # Si le fichier est bien uploader, avec aucune error
         if($file["error"] === 0)
         {
 
-          if($file["size"] <= 2000000)
+          if($file["size"] <= self::$fileSize)
           {
 
             $pathInfo = pathinfo($file["name"]);
@@ -250,15 +291,21 @@
               $filename = md5(uniqid(rand(null, true)));
               $ext = $pathInfo['extension'];
 
-              move_uploaded_file($file["tmp_name"], '../public/image/' . $filename . '.' . $ext);
+              move_uploaded_file($file["tmp_name"], $uploadedDirectory . $filename . '.' . $ext);
 
-              $status = self::SUCESS;
+              $status = [
+                "status" => self::SUCESS
+                "message" => self::surround('File Uploaded.', '#6DD37C')
+              ];
 
             }
             else
             {
 
-              $status = self::FAILURE . ' : Fichier non valide, verifiez le type de fichier.';
+              $status = [
+                'status' => self::FAILURE,
+                'message' => self::surround('Availabe File, verify file type.', '#E1371A')
+              ];
 
             }
 
@@ -266,7 +313,10 @@
           else
           {
 
-            $status = self::FAILURE . ' : Fichier trop grop, 2Mo au maximum.';
+            $status = [
+              'status' => self::FAILURE,
+              'message' => self::surround('File is more big, max size (2Mo).', '#E1371A');
+            ];
 
           }
 
@@ -303,6 +353,30 @@
         "query" => $query,
         "errorInfo" => $err[2] !== null ? self::ERROR .": ". str_replace("' ", " ", preg_replace("#'[a-zA-Z_-]+\.#", "", $err[2])) : self::NOTERROR
       ];
+
+    }
+    
+    /**
+    * surround, fonction permettant de formater en HTML un message d'error
+    * @param string, message.
+    * @param string, color
+    * @return string, message formater
+    */
+    private static function surround($message, $color)
+    {
+
+      return '<span style="color:' . $color . '">' . $message . '</span>'
+
+    }
+
+    /**
+    * setFileSize, fonction permettant de modifer la taille des fichiers a uploader
+    * @param int, nouvelle taille des fichier a uploader
+    */
+    public static function setFileSize($fileSize)
+    {
+
+      $self::$fileSize = (int) $fileSize;
 
     }
 
