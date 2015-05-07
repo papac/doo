@@ -32,105 +32,40 @@
 				{
 
 					$this->local = $timestanp;
-					$initDate = \getdate();
+          $timestanp = $this->local !== "ci_CI" ? time() : (time() - 7200);
 
 				}
-				else
-				{
+        else
+        {
 
-					$initDate = \getdate($timestanp);
+          if($local !== null)
+          {
+            $this->local = $local;
+            $timestanp -= $local === "ci_CI" ? $timestanp - 7200: $timestanp;
+          }
 
-				}
-
-			}
-			else
-			{
-
-				$initDate = \getdate();
+        }
 
 			}
+      else
+      {
+        $this->local = "fr_FR";
+        $timestanp = time() - 7200;
+      }
+
+      $initDate = \getdate($timestanp);
+
+			$this->seconds = $initDate['seconds'];
+			$this->minutes = $initDate['minutes'];
+			$this->hours = $initDate['hours'];
+
+			$this->dayOfWeek = $initDate['wday'];
+			$this->dayOfYear = $initDate['yday'];
+			$this->dayOfMonth = $initDate["mday"];
+			$this->year = $initDate['year'];
+			$this->monthOfYear = $initDate['mon'];
 
 			$this->timestanp = $initDate[0];
-
-			if($this->local === 'fr_FR')
-			{
-
-				$this->seconds = $initDate['seconds'];
-				$this->minutes = $initDate['minutes'];
-				$this->hours = $initDate['hours'];
-
-				$this->dayOfWeek = $initDate['wday'];
-				$this->dayOfYear = $initDate['yday'];
-				$this->dayOfMonth = $initDate["mday"];
-				$this->year = $initDate['year'];
-				$this->monthOfYear = $initDate['mon'];
-
-			}
-
-			elseif($this->local === 'es_ES')
-			{
-
-				$this->seconds = $initDate['seconds'];
-				$this->minutes = $initDate['minutes'];
-				$this->hours = $initDate['hours'];
-
-				$this->dayOfWeek = $initDate['wday'];
-				$this->dayOfYear = $initDate['yday'];
-				$this->dayOfMonth = $initDate["mday"];
-				$this->year = $initDate['year'];
-				$this->timestanp = $initDate[0];
-				$this->monthOfYear = $initDate['mon'];
-
-			}
-
-			elseif($this->local === "en_EN")
-			{
-
-				$this->seconds = $initDate['seconds'];
-				$this->minutes = $initDate['minutes'];
-				$this->hours = $initDate['hours'];
-
-				$this->dayOfWeek = $initDate['wday'];
-				$this->dayOfYear = $initDate['yday'];
-				$this->dayOfMonth = $initDate["mday"];
-				$this->year = $initDate['year'];
-				$this->monthOfYear = $initDate['mon'];
-
-			}
-
-			elseif($this->local === "ci_CI")
-			{
-
-				$this->dayOfWeek = $initDate['wday'];
-				$this->dayOfYear = $initDate['yday'];
-
-				$tmp = date_create('Africa/Abidjan');
-				$tmp = (array) $tmp;
-				$tmp = $tmp["date"];
-
-
-				$part = explode(' ', $tmp);
-				$partTime = explode(':', $part[1]);
-				$partDate = explode('-', $part[0]);
-
-				$initDate = [
-					"seconds" => (int) $partTime[2],
-					"minutes" => (int) $partTime[1],
-					"hours" => (int) $partTime[0],
-					"mday" => (int) $partDate[2],
-					"mon" => (int) $partDate[1],
-					"year" => (int) $partDate[0]
-				];
-
-				$this->seconds = $initDate['seconds'];
-				$this->minutes = $initDate['minutes'];
-				$this->hours = $initDate['hours'];
-
-				$this->dayOfMonth = $initDate["mday"];
-				$this->year = $initDate['year'];
-				$this->monthOfYear = $initDate['mon'];
-
-			}
 
 		}
 
@@ -150,7 +85,7 @@
 		* getDayName, fonction permetant de recuperer le nom litteral du jour
 		* @return string
 		*/
-		public function getDayName()
+		public function getDayName($cb = null)
 		{
 			$day = [
 
@@ -178,13 +113,24 @@
 				}
 
 				$dayName = $day[$this->local][$this->dayOfWeek - 1];
+
 			}
 			elseif($this->local === 'en_EN')
 			{
-				$dayName = getdate($this->timestanp)["wday"];
-			}
+
+        $dayName = \getdate($this->timestanp)["weekday"];
+
+      }
+
+      if($cb !== null)
+      {
+
+        $cb($dayName);
+
+      }
 
 			return $dayName;
+
 		}
 
 		public function getDayOfMonth($cb = null)
@@ -220,7 +166,11 @@
 			return $this->monthOfYear;
 
 		}
-
+    /**
+    * getMonthName, fonction permettant de recuperer le nom d'un mois
+    * @param function, une fonction de rappel
+    * @return string, le nom du mois
+    */
 		public function getMonthName($cb = null)
 		{
 
@@ -232,8 +182,9 @@
 					"Juillet", "Aout", "Sptembre",
 					"Octobre", "Novembre", "Decembre"
 				],
+        
 				"es_ES" => [
-					"MonthAtEs", "MonthAtEs", "MonthAtEs",
+					"Lunes", "Martes", "Miercoles",
 					"MonthAtEs", "MonthAtEs", "MonthAtEs",
 					"MonthAtEs", "MonthAtEs", "MonthAtEs",
 					"MonthAtEs", "MonthAtEs", "MonthAtEs"
@@ -257,7 +208,7 @@
 			elseif($this->local === 'en_EN')
 			{
 
-				$monthName = getdate($this->timestanp)["weekday"];
+				$monthName = getdate($this->timestanp)["month"];
 
 			}
 
@@ -306,11 +257,7 @@
 		public function addMonth($monthNumbre)
 		{
 
-			$month = [
-				"Janvier" => 31,
-				"Fervrier" => 28,
-				"Avril" => 31
-			];
+			$month = [ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 ];
 
 			return new DooDateMaker(time() + ($monthNumbre * 31 * 24 * 3600), $this->local);
 
