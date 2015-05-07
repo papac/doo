@@ -355,7 +355,7 @@
       ];
 
     }
-    
+
     /**
     * surround, fonction permettant de formater en HTML un message d'error
     * @param string, message.
@@ -376,7 +376,7 @@
     public static function setFileSize($fileSize)
     {
 
-      $self::$fileSize = (int) $fileSize;
+      self::$fileSize = (int) $fileSize;
 
     }
 

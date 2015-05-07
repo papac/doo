@@ -1,0 +1,13 @@
+{
+    "name": "doo/doo",
+    "description": "The simple system, for create simple app web eg. blog, chat, APIREST",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Dakia Franck",
+            "email": "dakiafranckinfo@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {}
+}
