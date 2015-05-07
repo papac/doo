@@ -41,7 +41,7 @@
           if($local !== null)
           {
             $this->local = $local;
-            $timestanp -= $local === "ci_CI" ? $timestanp - 7200: $timestanp;
+            $timestanp = $local === "ci_CI" ? $timestanp - 7200: $timestanp;
           }
 
         }
@@ -90,7 +90,7 @@
 			$day = [
 
 				"fr_FR" => [
-					"Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"
+          "Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"
 				],
 
 				"es_ES" => [
@@ -112,7 +112,7 @@
 
 				}
 
-				$dayName = $day[$this->local][$this->dayOfWeek - 1];
+				$dayName = $day[$this->local][$this->dayOfWeek];
 
 			}
 			elseif($this->local === 'en_EN')
@@ -182,7 +182,7 @@
 					"Juillet", "Aout", "Sptembre",
 					"Octobre", "Novembre", "Decembre"
 				],
-        
+
 				"es_ES" => [
 					"Lunes", "Martes", "Miercoles",
 					"MonthAtEs", "MonthAtEs", "MonthAtEs",
@@ -245,7 +245,7 @@
 		public function addDay($dayNumber)
 		{
 
-			return new DooDateMaker(time() + ($dayNumber * 24 * 3600), $this->local);
+			return new DooDateMaker($this->timestanp + ($dayNumber * 24 * 3600), $this->local);
 
 		}
 

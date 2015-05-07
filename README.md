@@ -13,24 +13,24 @@ __version 0.0.1__
     namespace Doo;
 
     #Initialize your connection string
-    
+
     require "path/to/Autoload.php"
     Autoload::register();
-    
+
     Doo::init(sdn [, function ]);
 ```
 
 `Doo::init`:
 
-    1. sdn: is your connection string engine://username:password@hostname:port/databasename;
-    
+    1. dsn: is your connection string engine://username:password@hostname:port/databasename;
+
         - engine: e.g mysql
         - username: user count name in your database server.
         - password: password to connect in your database server.
         - hostname: your database server host name.
         - port: the server port default `3306`
         - databasename: select your database.
-        
+
         e.g: mysql://papac:mypassword@sql.domaine.com/test
     2. function: take two arguments
         - $err: Object StdClass, information in error
