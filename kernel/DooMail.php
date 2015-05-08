@@ -13,15 +13,13 @@ class DooMail
       'subject' => you subject,
       'data' => your message
     ]";
+
   private static $destination = null;
   private static $subject = null;
   private static $message = null;
   public static $additionnalHeader = null;
 
-  function __construct(argument)
-  {
-    # code...
-  }
+
   public static function factory(array $information, $cb = null)
   {
 
@@ -39,7 +37,46 @@ class DooMail
     self::$subject = $information['subject'];
     self::$message = $information['data'];
 
-    return $cb('Good!');
+    if($cb !== null)
+    {
+
+      $cb(self::FORMAT);
+
+    }
+
+  }
+
+
+  /**
+  * addHeader, fonction permettant d'ajouter des headers suplementaire.
+  * @param array, un tableau comportant les headers du mail
+  */
+  public static function addHeader(array $heads, $cb = null)
+  {
+
+    if(is_array($heads))
+    {
+
+      self::$additionnalHeader = '';
+
+      $i = 0;
+
+      foreach($heads as $key => $value)
+      {
+
+        self::$additionnalHeader .= $key . ":" . $value . ($i > 0 ? ", ": "");
+        $i++;
+
+      }
+
+    }
+
+    if($cb !== null)
+    {
+
+      $cb(self::$additionnalHeader);
+
+    }
 
   }
 
