@@ -1,8 +1,8 @@
 <?php
 
-  namespace Doo;
+namespace Doo;
 
-  class Doo {
+class Doo {
 
     /**
     * Super constante, permetant de simplifier le information sur les erreurs
@@ -31,11 +31,11 @@
     public static function init($sdn, $cb = null)
     {
 
-      self::$bdd = Doodb::connection($sdn, $cb);
-      if(self::$bdd !== null)
-      {
-        self::$bdd->exec("SET NAMES UTF8");
-      }
+        self::$bdd = Doodb::connection($sdn, $cb);
+        if(self::$bdd !== null)
+        {
+            self::$bdd->exec("SET NAMES UTF8");
+        }
 
     }
 
@@ -48,20 +48,20 @@
     public static function setCharset($charset, $cb = null)
     {
 
-      if(!is_string($charset)){
-        return $cb(new Exception('encodage non valide'));
-      }
+        if(!is_string($charset)){
+            return $cb(new Exception('encodage non valide'));
+        }
 
-      self::$charset = $charset;
+        self::$charset = $charset;
 
-      $cb(null);
+        $cb(null);
 
     }
 
     public static function setFetchMode($pdoFetchMode)
     {
 
-      self::$modeDeRecuperationDeDonnee = (int) $pdoFetchMode;
+        self::$modeDeRecuperationDeDonnee = (int) $pdoFetchMode;
 
     }
 
@@ -78,76 +78,76 @@
     {
 
 
-      /**
-      * Utilisation global de la variable $bdd
-      */
-      # Une chaine contenant un liste de colonne des elements en visualiser
-      $fields = implode(", ", $fields);
+        /**
+        * Utilisation global de la variable $bdd
+        */
+        # Une chaine contenant un liste de colonne des elements en visualiser
+        $fields = implode(", ", $fields);
 
-      # Statement par defaut
-      $query = "SELECT " . $fields . " FROM " . $table;
+        # Statement par defaut
+        $query = "SELECT " . $fields . " FROM " . $table;
 
 
-      # Construction d'un SQL statement personnalisable
-      if($where !== NULL && is_array($where)){
+        # Construction d'un SQL statement personnalisable
+        if($where !== NULL && is_array($where)){
 
-        if(count($where) == 1){
+            if(count($where) == 1){
 
-          $query .= " WHERE " . implode(",", $where);
+                $query .= " WHERE " . implode(",", $where);
 
-        }else{
+            }else{
 
-          if(is_string($order)){
+                if(is_string($order)){
 
+                    $limit = $order;
+                    $order= $where;
+
+                }
+
+            }
+
+        }elseif(is_string($where)){
+
+            $limit = $where;
+
+        }
+
+        if(is_array($order) && count($order) == 2){
+
+            if(end($order) === true){
+
+                $query .= " ORDER BY " . $order[0] . " DESC";
+
+            }else{
+                $query .= " ORDER BY " . $order[0] . " ASC";
+            }
+
+        }elseif(is_string($order)){
             $limit = $order;
-            $order= $where;
-
-          }
-
         }
 
-      }elseif(is_string($where)){
+        if($limit !== null){
+            $query .= " LIMIT " . $limit;
+        }
 
-        $limit = $where;
+        $req = self::$bdd->query($query);
 
-      }
+        if($self::$charset !== null)
+        {
+            $self::$bdd->exec("SET NAMES " . self::$charset);
+        }
 
-      if(is_array($order) && count($order) == 2){
+        $err = self::getError(self::$bdd->errorInfo(), $query);
 
-        if(end($order) === true){
+        if(is_bool($req)){
 
-          $query .= " ORDER BY " . $order[0] . " DESC";
+            $cb($err, []);
 
         }else{
-          $query .= " ORDER BY " . $order[0] . " ASC";
+
+            $cb($err, $req->fetchAll(self::$modeDeRecuperationDeDonnee));
+
         }
-
-      }elseif(is_string($order)){
-        $limit = $order;
-      }
-
-      if($limit !== null){
-        $query .= " LIMIT " . $limit;
-      }
-
-      $req = self::$bdd->query($query);
-
-      if($self::$charset !== null)
-      {
-        $self::$bdd->exec("SET NAMES " . self::$charset);
-      }
-
-      $err = self::getError(self::$bdd->errorInfo(), $query);
-
-      if(is_bool($req)){
-
-        $cb($err, []);
-
-      }else{
-
-        $cb($err, $req->fetchAll(self::$modeDeRecuperationDeDonnee));
-
-      }
 
     }
 
@@ -161,11 +161,11 @@
 
     public static function update($table, $fields, $where, $cb){
 
-      $query = "UPDATE " . $table . " SET " . implode(", ", $fields) . " WHERE " . $where;
+        $query = "UPDATE " . $table . " SET " . implode(", ", $fields) . " WHERE " . $where;
 
-      self::$bdd->exec($query);
+        self::$bdd->exec($query);
 
-      $cb(self::getError(self::$bdd->errorInfo(), $query));
+        $cb(self::getError(self::$bdd->errorInfo(), $query));
 
     }
 
@@ -178,29 +178,30 @@
 
     public static function insert($table, $fields, $cb){
 
-      $query = "INSERT INTO {$table} SET ";
+        $query = "INSERT INTO {$table} SET ";
 
-      $i = 0;
+        $i = 0;
 
-      foreach ($fields as $key => $value)
-      {
+        foreach ($fields as $key => $value)
+        {
 
-        $query .= $i > 0 ? ", " : "";
-        $query .=  "{$key} = :{$key}";
-        $i++;
+            $query .= $i > 0 ? ", " : "";
+            $query .=  "{$key} = :{$key}";
+            $i++;
 
-      }
+        }
 
-      $req = self::$bdd->prepare($query);
+        $req = self::$bdd->prepare($query);
 
-      foreach($fields as $key => $value)
-      {
-        $req->bindValue("{$key}", $value, is_int($value) ? \PDO::PARAM_INT : \PDO::PARAM_STR);
-      }
+        foreach($fields as $key => $value)
+        {
 
-      $req->execute();
+            $req->bindValue("{$key}", $value, is_int($value) ? \PDO::PARAM_INT : \PDO::PARAM_STR);
 
-      $cb(self::getError(self::$bdd->errorInfo(), $query));
+        }
+
+        $req->execute();
+        $cb(self::getError(self::$bdd->errorInfo(), $query));
 
     }
 
@@ -214,14 +215,13 @@
 
     public static function delete($table, $where, $cb){
 
-      $query = "DELETE FROM " . $table . " WHERE id = :id";
+        $query = "DELETE FROM " . $table . " WHERE id = :id";
 
-      $req = self::$bdd->prepare($query);
-      $req->bindValue(":id", $where["id"], \PDO::PARAM_INT);
+        $req = self::$bdd->prepare($query);
+        $req->bindValue(":id", $where["id"], \PDO::PARAM_INT);
 
-      $req->execute();
-
-      $cb(self::getError(self::$bdd->errorInfo(), $query));
+        $req->execute();
+        $cb(self::getError(self::$bdd->errorInfo(), $query));
 
     }
 
@@ -237,106 +237,110 @@
     public static function uploadFile($file, array $extension, $upLoadedDirectory = null, $cb = null)
     {
 
-      if($uploadedDirectory !== null)
-      {
-
-        if(!is_string($uploadedDirectory))
+        if($uploadedDirectory !== null)
         {
 
-          $cb = $uploadedDirectory;
-
-        }
-
-      }
-
-      if(is_string($extension))
-      {
-        $extensionValide = explode(", ", $extension);
-      }
-      else
-      {
-        $cb = $extension;
-      }
-
-      # Si le fichier est bien dans le repertoir tmp de PHP
-      if(is_uploaded_file($file["tmp_name"]))
-      {
-
-        if($uploadedDirectory === null)
-        {
-
-          if(!is_dir('/uploaded'))
-          {
-
-            mkdir('/uploaded', 0777);
-
-          }
-
-          $uploadedDirectory = '/uploaded/';
-
-        }
-
-        # Si le fichier est bien uploader, avec aucune error
-        if($file["error"] === 0)
-        {
-
-          if($file["size"] <= self::$fileSize)
-          {
-
-            $pathInfo = pathinfo($file["name"]);
-
-            if(in_array($pathInfo["extension"], $extensionValide))
+            if(!is_string($uploadedDirectory))
             {
 
-              $filename = md5(uniqid(rand(null, true)));
-              $ext = $pathInfo['extension'];
-
-              move_uploaded_file($file["tmp_name"], $uploadedDirectory . $filename . '.' . $ext);
-
-              $status = [
-                "status" => self::SUCESS
-                "message" => self::surround('File Uploaded.', '#6DD37C')
-              ];
-
-            }
-            else
-            {
-
-              $status = [
-                'status' => self::FAILURE,
-                'message' => self::surround('Availabe File, verify file type.', '#E1371A')
-              ];
+                $cb = $uploadedDirectory;
 
             }
 
-          }
-          else
-          {
+        }
 
-            $status = [
-              'status' => self::FAILURE,
-              'message' => self::surround('File is more big, max size (2Mo).', '#E1371A');
-            ];
+        if(is_string($extension))
+        {
 
-          }
+            $extensionValide = explode(", ", $extension);
 
         }
         else
         {
 
-          $status = self::FAILURE . ' : Le fichier possède des erreurs.';
+            $cb = $extension;
 
         }
 
-      }
-      else
-      {
+        # Si le fichier est bien dans le repertoir tmp de PHP
+        if(is_uploaded_file($file["tmp_name"]))
+        {
 
-        $status = self::FAILURE . ' : Le fichier n\'a pas pus être uploader.';
+            if($uploadedDirectory === null)
+            {
 
-      }
+                if(!is_dir('/uploaded'))
+                {
 
-      $cb($status, isset($filename) ? $filename: null, isset($ext) ? $ext : null);
+                    mkdir('/uploaded', 0777);
+
+                }
+
+                $uploadedDirectory = '/uploaded/';
+
+            }
+
+            # Si le fichier est bien uploader, avec aucune error
+            if($file["error"] === 0)
+            {
+
+                if($file["size"] <= self::$fileSize)
+                {
+
+                    $pathInfo = pathinfo($file["name"]);
+
+                    if(in_array($pathInfo["extension"], $extensionValide))
+                    {
+
+                        $filename = md5(uniqid(rand(null, true)));
+                        $ext = $pathInfo['extension'];
+
+                        move_uploaded_file($file["tmp_name"], $uploadedDirectory . $filename . '.' . $ext);
+
+                        $status = [
+                            "status" => self::SUCESS
+                            "message" => self::surround('File Uploaded.', '#6DD37C')
+                        ];
+
+                    }
+                    else
+                    {
+
+                        $status = [
+                            'status' => self::FAILURE,
+                            'message' => self::surround('Availabe File, verify file type.', '#E1371A')
+                        ];
+
+                    }
+
+                }
+                else
+                {
+
+                    $status = [
+                        'status' => self::FAILURE,
+                        'message' => self::surround('File is more big, max size (2Mo).', '#E1371A');
+                    ];
+
+                }
+
+            }
+            else
+            {
+
+                $status = self::FAILURE . ' : Le fichier possède des erreurs.';
+
+            }
+
+        }
+        else
+        {
+
+            $status = self::FAILURE . ' : Le fichier n\'a pas pus être uploader.';
+
+        }
+
+        $cb($status, isset($filename) ? $filename: null, isset($ext) ? $ext : null);
 
     }
 
@@ -348,11 +352,11 @@
     */
     private static function getError($err, $query){
 
-      return (object) [
-        "error" => $err[2] !== null ? true: false,
-        "query" => $query,
-        "errorInfo" => $err[2] !== null ? self::ERROR .": ". str_replace("' ", " ", preg_replace("#'[a-zA-Z_-]+\.#", "", $err[2])) : self::NOTERROR
-      ];
+        return (object) [
+            "error" => $err[2] !== null ? true: false,
+            "query" => $query,
+            "errorInfo" => $err[2] !== null ? self::ERROR .": ". str_replace("' ", " ", preg_replace("#'[a-zA-Z_-]+\.#", "", $err[2])) : self::NOTERROR
+        ];
 
     }
 
@@ -365,7 +369,7 @@
     private static function surround($message, $color)
     {
 
-      return '<span style="color:' . $color . '">' . $message . '</span>'
+        return '<span style="color:' . $color . '">' . $message . '</span>'
 
     }
 
@@ -376,9 +380,9 @@
     public static function setFileSize($fileSize)
     {
 
-      self::$fileSize = (int) $fileSize;
+        self::$fileSize = (int) $fileSize;
 
     }
 
-  # Fichier, contenant un code simple en php, nous permettant d'executer de requete SQL.
-  }
+    # Fichier, contenant un code simple en php, nous permettant d'executer de requete SQL.
+}

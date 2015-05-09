@@ -51,7 +51,13 @@ $info = <<< EOPAGE
 <div style="border:1px solid #444; padding: 10px; font-size: 18px; color: #AAA;">
   ${statusMessage}
 </div>
-
 EOPAGE;
 
 echo $info;
+
+$time = new \Doo\DooDateMaker();
+
+var_dump($time);
+$otherTime = $time->addMonth(270);
+var_dump($otherTime);
+var_dump($otherTime->getMonthName());

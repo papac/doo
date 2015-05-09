@@ -7,6 +7,7 @@ namespace Doo;
 */
 class Autoload
 {
+	
 	public static function register()
 	{
 
@@ -26,7 +27,5 @@ class Autoload
 		require $class . '.php';
 
 	}
+
 }
-
-
-?>
