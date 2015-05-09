@@ -58,6 +58,6 @@ echo $info;
 $time = new \Doo\DooDateMaker();
 
 var_dump($time);
-$otherTime = $time->addMonth(270);
+$otherTime = $time->addMonth(-1);
 var_dump($otherTime);
 var_dump($otherTime->getMonthName());

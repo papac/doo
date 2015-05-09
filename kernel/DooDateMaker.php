@@ -83,7 +83,8 @@ class DooDateMaker
     }
 
     /**
-    * getDayName, fonction permetant de recuperer le nom litteral du jour
+    * getDayName, fonction permetant de recuperer le nom litteral du jour.
+    * @param function, fonction de rappel
     * @return string
     */
     public function getDayName($cb = null)
@@ -130,6 +131,19 @@ class DooDateMaker
         return $dayName;
     }
 
+    /**
+    * getDayOfMonth, fonction permetant d'obtenir le numero du jour du mois
+    * @param function, fonction de rappel facultatif
+    * =================== e.g ================================
+    * $date = new DooDateMaker();
+    * echo $date->getDayOfMonth([function]);
+    * // or
+    * $date->getDayOfMonth(function($dayOfMonth)
+    * {
+    *   echo $dateOfMonth;
+    * });
+    *
+    */
     public function getDayOfMonth($cb = null)
     {
 
@@ -245,7 +259,7 @@ class DooDateMaker
 
 
     /**
-    *	addDay, fonction permetant d'ajouter des jours
+    * addDay, fonction permetant d'ajouter des jours
     * @param int, un timestanp
     * @return DooDateMaker, avec l'ajout des jours
     */
@@ -261,8 +275,27 @@ class DooDateMaker
     * @param int, un timestanp
     * @return DooDateMaker, avec l'ajout des jours
     */
-    public function addMonth($monthNumbre)
+    public function addMonth($monthNumber, $cb = null)
     {
+        if($monthNumber < 0)
+        {
+
+            if($cb !== null)
+            {
+
+                $cb("Error, verify offset => not accepted negative offset");
+                return null;
+
+            }
+            else
+            {
+
+                trigger_error("Error, verify offset => not accepted negative offset", E_USER_WARNING);
+
+            }
+
+
+        }
 
         $month = [
             31, 28, 31,
@@ -273,9 +306,9 @@ class DooDateMaker
 
         $somOfDay = 0;
 
-        $i = $this->monthOfYear - 1;
+        $i = $this->monthOfYear;
 
-        while($monthNumbre--)
+        while($monthNumber--)
         {
 
             if($i > 11){
