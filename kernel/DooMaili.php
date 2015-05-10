@@ -57,6 +57,11 @@ class DooMaili
 
     }
 
+    /**
+    * to, fonction permetant de definir le destinateur de mail
+    * @param string
+    * @return DooMaili, Object DooMaili
+    */
     public function to($to)
     {
 
@@ -65,14 +70,11 @@ class DooMaili
 
     }
 
-    public function form($form)
-    {
-
-        $this->to = $form;
-        return $this;
-
-    }
-
+    /**
+    * subject, fonction permetant de definir le sujet du mail
+    * @param string
+    * @return DooMaili, Object DooMaili
+    */
     public function subject($sub){
 
         $this->subject = $sub;
@@ -80,6 +82,11 @@ class DooMaili
 
     }
 
+    /**
+    * data, fonction permettant de definir le message a envoyer
+    * @param string
+    * @return DooMaili, Object DooMaili
+    */
     public function data($msg)
     {
 
