@@ -19,7 +19,12 @@ class DooMaili
     private $data = null;
     private $additionnalHeader = null;
 
-
+    /**
+    * factory, fonction permettant de construire le message a envoye
+    * @param array, information du message.
+    * @param function, fonction de rappel
+    * @return string.
+    */
     public function factory(array $information, $cb = null)
     {
 
@@ -116,6 +121,10 @@ class DooMaili
 
     }
 
+    /**
+    * send, fonction de declanchement de l'envoie de mail
+    * @param function, fonction de rappel pour recuperer l'etat apres envoie de mail
+    */
     public function send($cb = null)
     {
 
@@ -138,6 +147,10 @@ class DooMaili
 
     }
 
+    /**
+    * setMailServer, fonction permettant de definir de quel serveur le mail sera envoyer
+    * @param string, le nom de serveur, ou l'adresse IP du serveur
+    */
     public function setMailServer($serverName)
     {
 
@@ -150,6 +163,10 @@ class DooMaili
 
     }
 
+    /**
+    * setPort, fonction permettant de configurer le port smtp
+    * @param string, le numero de port
+    */
     public function setPort($port)
     {
 
