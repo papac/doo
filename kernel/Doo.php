@@ -1,5 +1,10 @@
 <?php
-
+/**
+* PHP, une classe PHP simple. Dans le but simplifié l'utilisation de PDO
+* @author Dakia Franck <dakiafranckinfo@gmail.com>
+* @package Doo;
+* @version 0.1.0
+*/
 namespace Doo;
 
 class Doo {
@@ -20,6 +25,14 @@ class Doo {
 
     # Object de connection PDO
     private static $bdd = null;
+
+    # Fetch Mode
+    const OBJECT = \PDO::FETCH_OBJ;
+    const ASSOC = \PDO::FETCH_ASSOC;
+    const NUM = \PDO::FETCH_NUM;
+
+    # repertoire par defaut d'upload de fichier
+    private static $uploadDir = "/uploaded";
 
     # taille du fichier
     private static $fileSize = 2000000;
@@ -57,7 +70,10 @@ class Doo {
         $cb(null);
 
     }
-
+    /**
+    * setFetchMode, fonction permettant de redefinir la methode de recuperation des information
+    * @param int: PDO fecth constant
+    */
     public static function setFetchMode($pdoFetchMode)
     {
 
@@ -89,52 +105,84 @@ class Doo {
 
 
         # Construction d'un SQL statement personnalisable
-        if($where !== NULL && is_array($where)){
+        if($where !== null && is_array($where))
+        {
+            
+            $c = count($where);
 
-            if(count($where) == 1){
+            if($c == 1)
+            {
 
                 $query .= " WHERE " . implode(",", $where);
 
-            }else{
+            }
+            else if($c == 2)
+            {
 
-                if(is_string($order)){
+                if(is_array($order) && count($order) == 2)
+                {
+                    
+                    trigger_error("Syntax error, le parametre apres la fonction est un where de ", E_WARNING);
 
+                }else if(is_string($order))
+                {
                     $limit = $order;
-                    $order= $where;
-
                 }
 
             }
+            else
+            {
+                if(is_string($order)){
 
-        }elseif(is_string($where)){
+                    $limit = $order;
+                    $order = $where;
+
+                }
+            }
+
+        }
+        elseif(is_string($where))
+        {
 
             $limit = $where;
 
         }
 
-        if(is_array($order) && count($order) == 2){
+        if(is_array($order) && count($order) == 2)
+        {
 
             if(end($order) === true){
 
                 $query .= " ORDER BY " . $order[0] . " DESC";
 
             }else{
+        
                 $query .= " ORDER BY " . $order[0] . " ASC";
+        
             }
 
-        }elseif(is_string($order)){
+        }
+        elseif(is_string($order))
+        {
+        
             $limit = $order;
+        
         }
 
-        if($limit !== null){
+        if($limit !== null)
+        {
+        
             $query .= " LIMIT " . $limit;
+        
         }
 
         $req = self::$bdd->query($query);
 
-        if($self::$charset !== null)
+        if(self::$charset !== null)
         {
-            $self::$bdd->exec("SET NAMES " . self::$charset);
+        
+            self::$bdd->exec("SET NAMES " . self::$charset);
+        
         }
 
         $err = self::getError(self::$bdd->errorInfo(), $query);
@@ -234,22 +282,10 @@ class Doo {
     * @param fonction[$cb = null], fonction de rappel pour recuperer les erreurs.
     */
 
-    public static function uploadFile($file, array $extension, $upLoadedDirectory = null, $cb = null)
+    public static function uploadFile($file, array $extension, $cb = null, $hash = null)
     {
 
-        if($uploadedDirectory !== null)
-        {
-
-            if(!is_string($uploadedDirectory))
-            {
-
-                $cb = $uploadedDirectory;
-
-            }
-
-        }
-
-        if(is_string($extension))
+        if(is_array($extension))
         {
 
             $extensionValide = explode(", ", $extension);
@@ -266,17 +302,10 @@ class Doo {
         if(is_uploaded_file($file["tmp_name"]))
         {
 
-            if($uploadedDirectory === null)
+            if(!is_dir(self::uploadDir))
             {
 
-                if(!is_dir('/uploaded'))
-                {
-
-                    mkdir('/uploaded', 0777);
-
-                }
-
-                $uploadedDirectory = '/uploaded/';
+                mkdir(self::uploadDir, 0777);
 
             }
 
@@ -287,18 +316,29 @@ class Doo {
                 if($file["size"] <= self::$fileSize)
                 {
 
-                    $pathInfo = pathinfo($file["name"]);
+                    $pathInfo = (object) pathinfo($file["name"]);
 
                     if(in_array($pathInfo["extension"], $extensionValide))
                     {
 
-                        $filename = md5(uniqid(rand(null, true)));
-                        $ext = $pathInfo['extension'];
+                        if(hash !== null)
+                        {
+                        
+                            $filename = hash(hash, uniqid(rand(null, true)));
+                        
+                        }else
+                        {
 
-                        move_uploaded_file($file["tmp_name"], $uploadedDirectory . $filename . '.' . $ext);
+                            $filename = $pathInfo->name;
+                        
+                        }
+
+                        $ext = $pathInfo->extension;
+
+                        move_uploaded_file($file["tmp_name"], self::uploadDir . "/" . $filename . '.' . $ext);
 
                         $status = [
-                            "status" => self::SUCESS
+                            "status" => self::SUCCESS,
                             "message" => self::surround('File Uploaded.', '#6DD37C')
                         ];
 
@@ -319,7 +359,7 @@ class Doo {
 
                     $status = [
                         'status' => self::FAILURE,
-                        'message' => self::surround('File is more big, max size (2Mo).', '#E1371A');
+                        'message' => self::surround('File is more big, max size (2Mo).', '#E1371A')
                     ];
 
                 }
@@ -328,7 +368,10 @@ class Doo {
             else
             {
 
-                $status = self::FAILURE . ' : Le fichier possède des erreurs.';
+                $status = [
+                    "status" => self::FAILURE,
+                    "message" => self::surround('Le fichier possède des erreurs.', "#E1371A")
+                ];
 
             }
 
@@ -341,6 +384,26 @@ class Doo {
         }
 
         $cb($status, isset($filename) ? $filename: null, isset($ext) ? $ext : null);
+
+    }
+    /**
+    * @param string:path, le chemin du dossier de l'upload
+    */
+    public static function setUploadedDir($path)
+    {
+        
+        if(is_string($path))
+        {
+        
+            self::$uploadDir = $path;
+        
+        }else
+        {
+        
+            trigger_error("SVP, une chaine de caracter est demander.", E_WARNING);
+            exit(false);
+        
+        }
 
     }
 
@@ -369,7 +432,7 @@ class Doo {
     private static function surround($message, $color)
     {
 
-        return '<span style="color:' . $color . '">' . $message . '</span>'
+        return '<span style="color:' . $color . '">' . $message . '</span>';
 
     }
 

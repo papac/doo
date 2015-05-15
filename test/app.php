@@ -1,63 +1,34 @@
 <?php
 
-  require "../Kernel/Autoload.php";
+    use \Doo\Doo;
+    use \Doo\Autoload;
 
-  \Doo\Autoload::register();
+    require "../kernel/Autoload.php";
 
-  $message = <<< EOPAGE
+    Autoload::register();
 
-    Lorem ipsum dolor sit amet,
-    consectetur adipisicing elit, sed do eiusmod
-    tempor incididunt ut labore et dolore magna aliqua.
-    Ut enim ad minim veniam, quis nostrud exercitation
-    ullamco laboris nisi ut aliquip ex ea commodo consequat.
-    Duis aute irure dolor in reprehenderit in voluptate
-    velit esse cillum dolore eu fugiat nulla pariatur.
-    Excepteur sint occaecat cupidatat non proident,
-    sunt in culpa qui officia deserunt
-    mollit anim id est laborum.
-
-EOPAGE;
-
-  $sub = "Je suis la mon type";
-  $des = "dakiafranckinfo@gmail.com";
-  $server = "smtp.gmail.com";
-  $port = "587";
-
-  $mailer = new \Doo\DooMaili();
-
-  $statusMessage = null;
-
-  $mailer
-    ->setMailServer($server)
-    ->setPort($port)
-    ->to($des)
-    ->subject($sub)
-    ->data($message)
-    ->send(function($status)
+    Doo::init("mysql://root@localhost/test", function($err)
     {
-      global $statusMessage;
-
-      if(!$status)
-      {
-        return $statusMessage = "Mail non envoyé.";
-      }
-
-      return $statusMessage = "Mail bien envoyé.";
-
+        if($err instanceof \Exception)
+        {
+            die($err->getMessage());
+        }
     });
 
-$info = <<< EOPAGE
-<div style="border:1px solid #444; padding: 10px; font-size: 18px; color: #AAA;">
-  ${statusMessage}
-</div>
-EOPAGE;
+    Doo::setFetchMode(Doo::NUM);
 
-echo $info;
+    Doo::select("news", ["auteur", "message"], function($err, $data)
+    {
+        if($err->error):
+            echo $err->getMessage();
+            return null;
+        endif;
+?>
 
-$time = new \Doo\DooDateMaker();
 
-var_dump($time);
-$otherTime = $time->addMonth(-1);
-var_dump($otherTime);
-var_dump($otherTime->getMonthName());
+    <?php foreach($data as $key => $value): ?>
+        <?= $value[1] ?>
+    <?php endforeach; ?>
+
+
+<?php }); ?>

@@ -44,7 +44,7 @@ class Doodb {
         try{
 
             # Instantiation de la connection via le driver PDO
-            $bdd = new \PDO("{$engine}:host={$host};dbname={$dbname}", "{$user}", "${password}");
+            $bdd = new \PDO("{$engine}:host={$host};dbname={$dbname}", "{$user}", "{$password}");
 
         }catch(\Exception $e){
             # gestion d'exception sur la chaine de connection PDO

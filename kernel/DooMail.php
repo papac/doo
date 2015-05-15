@@ -64,7 +64,7 @@ class DooMail
     * addHeader, fonction permettant d'ajouter des headers suplementaire.
     * @param array, un tableau comportant les headers du mail
     */
-    public static function addHeader(array $heads, $cb = null)
+    public static function addHeader(array $heads)
     {
 
         # Vérification de entete
@@ -86,15 +86,7 @@ class DooMail
 
         }
 
-        # Vérification de la fonction de rappel
-        if($cb !== null)
-        {
-            # Execution de la fonction de rappel
-            $cb(self::$additionnalHeader);
-
-        }
-
-        self::factoryIsDefine = true;
+        self::$factoryIsDefine = true;
 
     }
 
@@ -105,7 +97,7 @@ class DooMail
     public static function send($cb = null)
     {
 
-        if(self::factoryIsDefine)
+        if(self::$factoryIsDefine)
         {
 
             if($cb !== null)
@@ -118,7 +110,7 @@ class DooMail
             else
             {
 
-                trigger_error("Vous avez oublier de construir le message", E_USER_WARNING);
+                trigger_error("Vous avez oublier de construir le message", E_WARNING);
 
             }
 

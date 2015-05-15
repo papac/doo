@@ -15,6 +15,7 @@ class DooMaili
     ]";
 
     private $to = null;
+    private $from = null;
     private $subject = null;
     private $data = null;
     private $additionnalHeader = null;
@@ -38,7 +39,7 @@ class DooMaili
 
             }
 
-            return $this->FORMAT;
+            return self::FORMAT;
 
         }
 
@@ -49,12 +50,35 @@ class DooMaili
         if($cb !== null)
         {
 
-            $cb($this->FORMAT);
+            $cb(self::FORMAT);
 
         }
 
         return $this;
 
+    }
+
+    /**
+    * from, fonction permettant de definir l'envoyeur de mail
+    * @param string
+    * @param DooMaili, Object DooMaili
+    */
+    publuc function from($from)
+    {
+        if(is_string($from))
+        {
+
+            $this->from = $from;            
+
+        }
+        else
+        {
+
+             return self::errno();
+
+        }
+
+        return $this;
     }
 
     /**
@@ -65,7 +89,19 @@ class DooMaili
     public function to($to)
     {
 
-        $this->$to = $to;
+        if(is_string($to))
+        {
+        
+            $this->$to = $to;
+        
+        }
+        else
+        {
+
+            return self::errno();
+
+        }
+        
         return $this;
 
     }
@@ -77,7 +113,19 @@ class DooMaili
     */
     public function subject($sub){
 
-        $this->subject = $sub;
+        if(is_string($sub))
+        {
+
+            $this->subject = $sub;
+            
+        }
+        else
+        {
+
+             return self::errno();
+
+        }
+
         return $this;
 
     }
@@ -90,7 +138,19 @@ class DooMaili
     public function data($msg)
     {
 
-        $this->data = $msg;
+        if(is_string($msg))
+        {
+
+            $this->data = $msg;
+            
+        }
+        else
+        {
+
+            return self::errno();
+
+        }
+
         return $this;
 
     }
@@ -105,14 +165,14 @@ class DooMaili
         if(is_array($heads))
         {
 
-            $this->$additionnalHeader = '';
+            $this->additionnalHeader = '';
 
             $i = 0;
 
             foreach($heads as $key => $value)
             {
 
-                $this->$additionnalHeader .= $key . ":" . $value . ($i > 0 ? ", ": "");
+                $this->additionnalHeader .= $key . ":" . $value . ($i > 0 ? ", ": "");
                 $i++;
 
             }
@@ -122,7 +182,7 @@ class DooMaili
         if($cb !== null)
         {
 
-            $cb($this->$additionnalHeader);
+            $cb($this->additionnalHeader);
 
         }
 
@@ -186,6 +246,11 @@ class DooMaili
 
         return $this;
 
+    }
+
+    private static function errno()
+    {
+        return trigger_error("excepted parameter string.", E_WARNING);
     }
 
 }
