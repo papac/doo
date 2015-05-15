@@ -1,4 +1,5 @@
 <?php
+
 /**
 * PHP, une classe PHP simple. Dans le but simplifié l'utilisation de PDO
 * @author Dakia Franck <dakiafranckinfo@gmail.com>
@@ -14,7 +15,7 @@ class Doo {
     */
     const NOTERROR =  "<span style=\"color:red\">NOT ERROR</span>";
     const ERROR =  "<span style=\"color:red\">ERROR</span>";
-    const SUCESS =  "<span style=\"color:red\">SUCESS</span>";
+    const SUCCESS =  "<span style=\"color:red\">SUCESS</span>";
     const FAILURE =  "<span style=\"color:red\">FAILURE</span>";
 
     # configuration du jeu de caractere
@@ -32,7 +33,7 @@ class Doo {
     const NUM = \PDO::FETCH_NUM;
 
     # repertoire par defaut d'upload de fichier
-    private static $uploadDir = "/uploaded";
+    private static $uploadDir = "uploaded";
 
     # taille du fichier
     private static $fileSize = 2000000;
@@ -45,9 +46,17 @@ class Doo {
     {
 
         self::$bdd = Doodb::connection($sdn, $cb);
+
         if(self::$bdd !== null)
         {
-            self::$bdd->exec("SET NAMES UTF8");
+            
+            if(self::$charset !== null)
+            {
+
+                self::$bdd->exec("SET NAMES " . self::$charset);
+            
+            }
+        
         }
 
     }
@@ -61,13 +70,38 @@ class Doo {
     public static function setCharset($charset, $cb = null)
     {
 
-        if(!is_string($charset)){
-            return $cb(new Exception('encodage non valide'));
+        if(!in_array($charset, ["UTF8", "ISO-8859"])){
+            
+            if($cb !== null)
+            {
+
+                return $cb(new \Exception('Encodage non valide'));
+                
+            }
+            else
+            {
+
+                trigger_error("Encodage non valide", E_USER_WARNING);
+                exit();
+
+            }
+        
+        }
+        else
+        {
+
+
+
         }
 
         self::$charset = $charset;
 
-        $cb(null);
+        if($cb !== null)
+        {
+
+            $cb(null);
+
+        }
 
     }
     /**
@@ -123,8 +157,10 @@ class Doo {
                 {
                     
                     trigger_error("Syntax error, le parametre apres la fonction est un where de ", E_WARNING);
+                    exit();
 
-                }else if(is_string($order))
+                }
+                else if(is_string($order))
                 {
                     $limit = $order;
                 }
@@ -132,7 +168,8 @@ class Doo {
             }
             else
             {
-                if(is_string($order)){
+                if(is_string($order))
+                {
 
                     $limit = $order;
                     $order = $where;
@@ -151,11 +188,14 @@ class Doo {
         if(is_array($order) && count($order) == 2)
         {
 
-            if(end($order) === true){
+            if(end($order) === true)
+            {
 
                 $query .= " ORDER BY " . $order[0] . " DESC";
 
-            }else{
+            }
+            else
+            {
         
                 $query .= " ORDER BY " . $order[0] . " ASC";
         
@@ -176,8 +216,6 @@ class Doo {
         
         }
 
-        $req = self::$bdd->query($query);
-
         if(self::$charset !== null)
         {
         
@@ -185,13 +223,18 @@ class Doo {
         
         }
 
+        $req = self::$bdd->query($query);
+
+
         $err = self::getError(self::$bdd->errorInfo(), $query);
 
-        if(is_bool($req)){
+        if(is_bool($req))
+        {
 
             $cb($err, []);
 
-        }else{
+        }else
+        {
 
             $cb($err, $req->fetchAll(self::$modeDeRecuperationDeDonnee));
 
@@ -207,7 +250,8 @@ class Doo {
     * @param where string: where condition
     */
 
-    public static function update($table, $fields, $where, $cb){
+    public static function update($table, $fields, $where, $cb)
+    {
 
         $query = "UPDATE " . $table . " SET " . implode(", ", $fields) . " WHERE " . $where;
 
@@ -224,7 +268,8 @@ class Doo {
     * @param cb function: fonction de recuperation des erreurs et des donnees
     */
 
-    public static function insert($table, $fields, $cb){
+    public static function insert($table, $fields, $cb)
+    {
 
         $query = "INSERT INTO {$table} SET ";
 
@@ -249,6 +294,7 @@ class Doo {
         }
 
         $req->execute();
+
         $cb(self::getError(self::$bdd->errorInfo(), $query));
 
     }
@@ -261,14 +307,17 @@ class Doo {
     * @param cb function: fonction de recuperation des erreurs et des donnees
     */
 
-    public static function delete($table, $where, $cb){
+    public static function delete($table, $where, $cb)
+    {
 
         $query = "DELETE FROM " . $table . " WHERE id = :id";
 
         $req = self::$bdd->prepare($query);
+
         $req->bindValue(":id", $where["id"], \PDO::PARAM_INT);
 
         $req->execute();
+
         $cb(self::getError(self::$bdd->errorInfo(), $query));
 
     }
@@ -288,7 +337,7 @@ class Doo {
         if(is_array($extension))
         {
 
-            $extensionValide = explode(", ", $extension);
+            $extensionValide = $extension;
 
         }
         else
@@ -302,10 +351,10 @@ class Doo {
         if(is_uploaded_file($file["tmp_name"]))
         {
 
-            if(!is_dir(self::uploadDir))
+            if(!is_dir(self::$uploadDir))
             {
 
-                mkdir(self::uploadDir, 0777);
+                mkdir(self::$uploadDir, 0777);
 
             }
 
@@ -318,25 +367,26 @@ class Doo {
 
                     $pathInfo = (object) pathinfo($file["name"]);
 
-                    if(in_array($pathInfo["extension"], $extensionValide))
+                    if(in_array($pathInfo->extension, $extensionValide))
                     {
 
-                        if(hash !== null)
+                        if($hash !== null)
                         {
                         
-                            $filename = hash(hash, uniqid(rand(null, true)));
+                            $filename = hash($hash, uniqid(rand(null, true)));
                         
                         }else
                         {
 
-                            $filename = $pathInfo->name;
+                            $filename = $pathInfo->filename;
                         
                         }
 
                         $ext = $pathInfo->extension;
 
-                        move_uploaded_file($file["tmp_name"], self::uploadDir . "/" . $filename . '.' . $ext);
+                        move_uploaded_file($file["tmp_name"], self::$uploadDir . "/" . $filename . '.' . $ext);
 
+                        # Status, fichier uploadé
                         $status = [
                             "status" => self::SUCCESS,
                             "message" => self::surround('File Uploaded.', '#6DD37C')
@@ -346,9 +396,10 @@ class Doo {
                     else
                     {
 
+                        # Status, extension du fichier
                         $status = [
                             'status' => self::FAILURE,
-                            'message' => self::surround('Availabe File, verify file type.', '#E1371A')
+                            'message' => self::surround(self::FAILURE . ': Availabe File, verify file type.', '#E1371A')
                         ];
 
                     }
@@ -357,9 +408,10 @@ class Doo {
                 else
                 {
 
+                    # Status, la taille est invalide
                     $status = [
                         'status' => self::FAILURE,
-                        'message' => self::surround('File is more big, max size (2Mo).', '#E1371A')
+                        'message' => self::surround('File is more big, max size ' . self::$fileSize. ' octets.', '#E1371A')
                     ];
 
                 }
@@ -368,6 +420,7 @@ class Doo {
             else
             {
 
+                # Status, fichier erroné.
                 $status = [
                     "status" => self::FAILURE,
                     "message" => self::surround('Le fichier possède des erreurs.', "#E1371A")
@@ -379,14 +432,25 @@ class Doo {
         else
         {
 
-            $status = self::FAILURE . ' : Le fichier n\'a pas pus être uploader.';
+            # Status, fichier non uploadé 
+            $status = [
+                "status" => self::FAILURE,
+                "message" => self::FAILURE . ' : Le fichier n\'a pas pus être uploader.'
+            ];
 
         }
 
-        $cb($status, isset($filename) ? $filename: null, isset($ext) ? $ext : null);
+        if($cb !== null)
+        {
+        
+            $cb((object) $status, isset($filename) ? $filename: null, isset($ext) ? $ext : null);
+        
+        }
 
     }
+
     /**
+    * setUploadedDir, fonction permettant de redefinir le repertoir d'upload
     * @param string:path, le chemin du dossier de l'upload
     */
     public static function setUploadedDir($path)
@@ -401,7 +465,7 @@ class Doo {
         {
         
             trigger_error("SVP, une chaine de caracter est demander.", E_WARNING);
-            exit(false);
+            exit();
         
         }
 
@@ -413,7 +477,8 @@ class Doo {
     * @param string, la requete sur laquelle il y a eu l'erreur
     * @return object, un objet contenant les informations formates de l'erreur
     */
-    private static function getError($err, $query){
+    private static function getError($err, $query)
+    {
 
         return (object) [
             "error" => $err[2] !== null ? true: false,

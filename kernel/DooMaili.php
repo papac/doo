@@ -1,5 +1,12 @@
 <?php
 
+/**
+* PHP, une classe PHP simple. Dans le but simplifié l'utilisation de PDO
+* @author Dakia Franck <dakiafranckinfo@gmail.com>
+* @package Doo;
+* @version 0.1.0
+*/
+
 namespace Doo;
 
 /**
@@ -18,7 +25,15 @@ class DooMaili
     private $from = null;
     private $subject = null;
     private $data = null;
-    private $additionnalHeader = null;
+    private $additionnalHeader = [];
+    private $boundaryHash;
+
+    function __construct()
+    {
+
+        $this->boundaryHash = md5(date("r", time()));
+
+    }
 
     /**
     * factory, fonction permettant de construire le message a envoye
@@ -98,7 +113,7 @@ class DooMaili
         else
         {
 
-            return self::errno();
+            self::errno("Excepted parameter string.");
 
         }
         
@@ -122,7 +137,7 @@ class DooMaili
         else
         {
 
-             return self::errno();
+            self::errno("Excepted parameter string.");
 
         }
 
@@ -147,7 +162,7 @@ class DooMaili
         else
         {
 
-            return self::errno();
+            self::errno("Excepted parameter string.");
 
         }
 
@@ -159,32 +174,10 @@ class DooMaili
     * addHeader, fonction permettant d'ajouter des headers suplementaire.
     * @param array, un tableau comportant les headers du mail
     */
-    public function addHeader(array $heads, $cb = null)
+    public function addHeader($head)
     {
 
-        if(is_array($heads))
-        {
-
-            $this->additionnalHeader = '';
-
-            $i = 0;
-
-            foreach($heads as $key => $value)
-            {
-
-                $this->additionnalHeader .= $key . ":" . $value . ($i > 0 ? ", ": "");
-                $i++;
-
-            }
-
-        }
-
-        if($cb !== null)
-        {
-
-            $cb($this->additionnalHeader);
-
-        }
+        $this->additionnalHeader[] = $head;
 
     }
 
@@ -247,10 +240,20 @@ class DooMaili
         return $this;
 
     }
-
-    private static function errno()
+    /**
+    * errno, fonction permettant de 
+    */
+    private static function errno($msg)
     {
-        return trigger_error("excepted parameter string.", E_WARNING);
+        trigger_error($msg, E_WARNING);
+        exit();
+    }
+
+    private function prepareAttachement()
+    {
+
+        
+        
     }
 
 }
