@@ -14,16 +14,34 @@ namespace Doo;
 class DooMail
 {
 
+    /**
+     *
+     */
     const FORMAT = "[
         'to' => destination@maildomain.com,
         'subject' => you subject,
         'data' => your message
     ]";
 
+    /**
+     * @var null
+     */
     private static $destination = null;
+    /**
+     * @var null
+     */
     private static $subject = null;
+    /**
+     * @var null
+     */
     private static $message = null;
+    /**
+     * @var null
+     */
     private static $additionnalHeader = null;
+    /**
+     * @var bool
+     */
     private static $factoryIsDefine = false;
 
     /**
@@ -44,7 +62,7 @@ class DooMail
             if($cb !== null)
             {
 
-                return $cb(self::FORMAT);
+                return call_user_func($cb, self::FORMAT);
 
             }
 
@@ -59,7 +77,7 @@ class DooMail
         if($cb !== null)
         {
 
-            $cb(self::FORMAT);
+            call_user_func($cb, self::FORMAT);
 
         }
 
@@ -109,7 +127,7 @@ class DooMail
             if($cb !== null)
             {
 
-                $cb("Vous avez oublier de construir le message", self::FORMAT);
+                call_user_func_array($cb, ["Vous avez oublier de construir le message", self::FORMAT]);
                 return null;
 
             }
@@ -137,7 +155,9 @@ class DooMail
 
         if($cb !== null)
         {
-            $cb($status);
+
+            call_user_func($cb, $status);
+
         }
 
     }

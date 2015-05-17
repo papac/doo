@@ -21,8 +21,8 @@ class Doodata
 	private static $dataLen  = null;
 
 	/**
-	* decrypto, fonction permettant de decrypter une chaine de caractere encrypter avec
-	* la fonction soeur.
+	* decrypto, fonction permettant de decrypter une chaine de caractere encrypter avec la fonction soeur.
+    *
 	* @param string, donnee a decrypter.
 	* @param function, une fonction de callback.
 	* @return string, resultat
@@ -36,7 +36,7 @@ class Doodata
 
 		if($cb !== null)
 		{
-			$cb(substr($r, 0, self::$dataLen));
+			call_user_func($cb, (substr($r, 0, self::$dataLen)));
 		}
 
 		return $r;
@@ -46,11 +46,11 @@ class Doodata
 
 	/**
 	* crypto, fonction permettant d'encrypter une chaine de caractere.
+    *
 	* @param string, donnee a encrypter.
 	* @param function, une fonction de callback.
 	* @return string, resultat
 	*/
-
 	public static function crypto($data, $cb = null)
 	{
 
@@ -60,7 +60,7 @@ class Doodata
 
 		if($cb !== null)
 		{
-			$cb($r);
+			call_user_func($cb, $r);
 		}
 
 		return $r;

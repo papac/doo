@@ -13,6 +13,7 @@ class Doodb {
 
     /**
     * creation d'un connection PDO
+    *
     * @param array
     * @param callback function
     * @return PDO || NULL
@@ -58,7 +59,7 @@ class Doodb {
             if($cb !== null)
             {
                 # is elle n'est pas null, execution de la fonction de rappel
-                $cb($e, $connectionData);
+                call_user_func_array($cb, [$e, $connectionData]);
             }
 
             return null;
@@ -68,7 +69,7 @@ class Doodb {
         if($cb !== null)
         {
             # is elle n'est pas null, execution de la fonction de rappel
-            $cb(null, $connectionData);
+            call_user_func_array($cb, [null, $connectionData]);
         }
 
         # Retour de l'objet PDO

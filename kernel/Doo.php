@@ -8,6 +8,11 @@
 */
 namespace Doo;
 
+/**
+ * Class Doo
+ *
+ * @package Doo
+ */
 class Doo {
 
     /**
@@ -75,7 +80,7 @@ class Doo {
             if($cb !== null)
             {
 
-                return $cb(new \Exception('Encodage non valide'));
+                return call_user_func_array($cb, [new \Exception('Encodage non valide')]);
                 
             }
             else
@@ -99,7 +104,7 @@ class Doo {
         if($cb !== null)
         {
 
-            $cb(null);
+            call_user_func($cb, null);
 
         }
 
@@ -117,11 +122,13 @@ class Doo {
 
     /**
     * select: fonction permettant d'executer tout forme de requette de type SELECT
-    * @param table string: la table sur laquelle faire la selection
-    * @param fields array: liste de colonne à visualiser
-    * @param cb function: fonction de recuperation des erreurs et des donnees
-    * @param order booleen: ORDER BY
-    * @param limit string: LIMIT
+    *
+    * @param string table : la table sur laquelle faire la selection
+    * @param array fields : liste de colonne à visualiser
+    * @param function cb: fonction de recuperation des erreurs et des donnees
+    * @param array [where = null]: condition supplementaire
+    * @param boolean order: ORDER BY
+    * @param string limit
     */
 
     public static function select($table, $fields, $cb, $where = null, $order = false, $limit = null)
@@ -244,10 +251,10 @@ class Doo {
 
     /**
     * update: fonction permettant d'executer tout forme de requette de type UPDATE
-    * @param table string: la table sur laquelle faire la selection
-    * @param fields array: liste de colonne à mettre a jour
-    * @param cb function: fonction de recuperation des erreurs et des donnees
-    * @param where string: where condition
+    * @param string table: la table sur laquelle faire la selection
+    * @param array fields: liste de colonne à mettre a jour
+    * @param function cb: fonction de recuperation des erreurs et des donnees
+    * @param string where: where condition
     */
 
     public static function update($table, $fields, $where, $cb)
@@ -263,9 +270,9 @@ class Doo {
 
     /**
     * insert: fonction permettant d'executer tout forme de requette de type INSERT
-    * @param table string: la table sur laquelle faire la selection
-    * @param fields array: liste de colonne à inserer
-    * @param cb function: fonction de recuperation des erreurs et des donnees
+    * @param string table : la table sur laquelle faire la selection
+    * @param array fields: liste de colonne à inserer
+    * @param function cb: fonction de recuperation des erreurs et des donnees
     */
 
     public static function insert($table, $fields, $cb)
@@ -302,12 +309,12 @@ class Doo {
 
     /**
     * delete: fonction permettant d'executer tout forme de requette de type DELETE
-    * @param table string: la table sur laquelle faire la selection
-    * @param where array: id des colonnes à supprimer
-    * @param cb function: fonction de recuperation des erreurs et des donnees
+    * @param string table
+    * @param array where: id des colonnes à supprimer
+    * @param function cb: fonction de recuperation des erreurs et des donnees
     */
 
-    public static function delete($table, $where, $cb)
+    public static function delete($table, $where, $cb = null)
     {
 
         $query = "DELETE FROM " . $table . " WHERE id = :id";
@@ -317,15 +324,17 @@ class Doo {
         $req->bindValue(":id", $where["id"], \PDO::PARAM_INT);
 
         $req->execute();
-
-        $cb(self::getError(self::$bdd->errorInfo(), $query));
+        if($cb !== null)
+        {
+            call_user_func($cb, [self::getError(self::$bdd->errorInfo(), $query)]);
+        }
 
     }
 
     /**
     * uploadFile, fonction permettant d'uploaded un fichier.
-    * @param array, un tableau comportant les inforamtio sur le fichier a uploader
-    * provenant de la variable $_FILES.
+    *
+    * @param array, un tableau comportant les inforamtio sur le fichier a uploader provenant de la variable $_FILES.
     * @param array, liste des extensions valides.
     * @param string[$uploadedDirectory = null], chemin du repretoire dans lequelle le fichier toi etre uploader.
     * @param fonction[$cb = null], fonction de rappel pour recuperer les erreurs.
@@ -443,7 +452,7 @@ class Doo {
         if($cb !== null)
         {
         
-            $cb((object) $status, isset($filename) ? $filename: null, isset($ext) ? $ext : null);
+            call_user_func_array($cb, [(object) $status, isset($filename) ? $filename : null, isset($ext) ? $ext : null]);
         
         }
 
@@ -473,6 +482,7 @@ class Doo {
 
     /**
     * getError est une fonction permetant de formater des erreurs, et nous les envoyes
+    *
     * @param array, liste des erreurs generer pas PDOException
     * @param string, la requete sur laquelle il y a eu l'erreur
     * @return object, un objet contenant les informations formates de l'erreur
@@ -490,6 +500,7 @@ class Doo {
 
     /**
     * surround, fonction permettant de formater en HTML un message d'error
+    *
     * @param string, message.
     * @param string, color
     * @return string, message formater
@@ -503,6 +514,7 @@ class Doo {
 
     /**
     * setFileSize, fonction permettant de modifer la taille des fichiers a uploader
+    *
     * @param int, nouvelle taille des fichier a uploader
     */
     public static function setFileSize($fileSize)

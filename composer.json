@@ -8,6 +8,9 @@
             "email": "dakiafranckinfo@gmail.com"
         }
     ],
+    "psr-4" : {
+        "Doo\\": "Kernel"
+    },
     "minimum-stability": "dev",
     "require": {}
 }

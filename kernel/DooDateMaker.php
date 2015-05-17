@@ -12,22 +12,66 @@ namespace Doo;
 * Doo date maker
 * Create date 05/05/2015
 */
+/**
+ * Class DooDateMaker
+ *
+ * @package Doo
+ */
+/**
+ * Class DooDateMaker
+ *
+ * @package Doo
+ */
 class DooDateMaker
 {
 
+    /**
+     * @var
+     */
     private $timestanp;
+    /**
+     * @var string
+     */
     private $local;
 
+    /**
+     * @var
+     */
     private $seconds;
+    /**
+     * @var
+     */
     private $minutes;
+    /**
+     * @var
+     */
     private $hours;
 
+    /**
+     * @var
+     */
     private $dayOfYear;
+    /**
+     * @var
+     */
     private $dayOfWeek;
+    /**
+     * @var
+     */
     private $dayOfMonth;
+    /**
+     * @var
+     */
     private $monthOfYear;
+    /**
+     * @var
+     */
     private $year;
 
+    /**
+     * @param null $timestanp
+     * @param null $local
+     */
     function __construct($timestanp = null, $local = null)
     {
 
@@ -90,6 +134,7 @@ class DooDateMaker
 
     /**
     * getDayName, fonction permetant de recuperer le nom litteral du jour.
+    *
     * @param function, fonction de rappel
     * @return string
     */
@@ -130,7 +175,7 @@ class DooDateMaker
         if($cb !== null)
         {
 
-            $cb($dayName);
+            call_user_func($cb, $dayName);
 
         }
 
@@ -156,7 +201,7 @@ class DooDateMaker
         if($cb !== null)
         {
 
-            $cb($this->dayOfWeek);
+            call_user_func($cb, $this->dayOfWeek);
 
         }
 
@@ -164,13 +209,17 @@ class DooDateMaker
 
     }
 
+    /**
+     * @param null $cb
+     * @return mixed
+     */
     public function getYear($cb = null)
     {
 
         if($cb !== null)
         {
 
-            $cb($this->year);
+            call_user_func($cb, $this->year);
 
         }
 
@@ -178,13 +227,17 @@ class DooDateMaker
 
     }
 
+    /**
+     * @param null $cb
+     * @return mixed
+     */
     public function getMonthOfYear($cb = null)
     {
 
         if($cb !== null)
         {
 
-            $cb($this->monthOfYear);
+            call_user_func($cb ,$this->monthOfYear);
 
         }
 
@@ -255,7 +308,7 @@ class DooDateMaker
         if($cb !== null)
         {
 
-            $cb($date);
+            call_user_func($cb, $date);
 
         }
 
@@ -278,7 +331,9 @@ class DooDateMaker
 
     /**
     * addMonth, fonction permetant d'ajouter des mois
-    * @param int, un timestanp
+    *
+    * @param int $monthNumber, un timestamp
+    * @param null $cb, un callable
     * @return DooDateMaker, avec l'ajout des jours
     */
     public function addMonth($monthNumber, $cb = null)
@@ -289,7 +344,7 @@ class DooDateMaker
             if($cb !== null)
             {
 
-                $cb("Error, verify offset => not accepted negative offset");
+                call_user_func($cb, new \Exception("Error, verify offset => not accepted negative offset"));
                 return null;
 
             }
@@ -334,6 +389,7 @@ class DooDateMaker
 
     /**
     * seconds, fonction permetant de recuperer les seconds
+    *
     * @return int, nombre de seconds
     */
     public function seconds()
@@ -346,6 +402,7 @@ class DooDateMaker
 
     /**
     * hours, fonction permetant de recuperer les heures
+    *
     * @return int, nombre de heures
     */
     public function hours()
@@ -357,6 +414,7 @@ class DooDateMaker
 
     /**
     * minutes, fonction permetant de recuperer les minutes
+    *
     * @return int, nombre de minute
     */
     public function minutes()

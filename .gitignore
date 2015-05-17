@@ -1,3 +1,5 @@
 test/*
 Mail-master/*
 README.md
+.idea/*
+*.json

@@ -15,18 +15,44 @@ namespace Doo;
 class DooMaili
 {
 
+    /**
+     *
+     */
     const FORMAT = "[
         'to' => to@maildomain.com,
         'subject' => you subject,
         'data' => your data
     ]";
 
+    /**
+     * @var null
+     */
     private $to = null;
+    /**
+     * @var null
+     */
     private $from = null;
+    /**
+     * @var null
+     */
     private $subject = null;
+    /**
+     * @var null
+     */
     private $data = null;
+    /**
+     * @var array
+     */
     private $additionnalHeader = [];
+    /**
+     * @var string
+     */
     private $boundaryHash;
+
+    /**
+     * @var array
+     */
+    private $fileAttachement;
 
     function __construct()
     {
@@ -39,7 +65,7 @@ class DooMaili
     * factory, fonction permettant de construire le message a envoye
     * @param array, information du message.
     * @param function, fonction de rappel
-    * @return string.
+    * @return $this.
     */
     public function factory(array $information, $cb = null)
     {
@@ -50,7 +76,7 @@ class DooMaili
             if($cb !== null)
             {
 
-                return $cb($this->FORMAT);
+                return call_user_func($cb, self::FORMAT);
 
             }
 
@@ -65,7 +91,7 @@ class DooMaili
         if($cb !== null)
         {
 
-            $cb(self::FORMAT);
+            call_user_func($cb, self::FORMAT);
 
         }
 
@@ -75,8 +101,10 @@ class DooMaili
 
     /**
     * from, fonction permettant de definir l'envoyeur de mail
+    *
     * @param string
     * @param DooMaili, Object DooMaili
+    * @return $this
     */
     publuc function from($from)
     {
@@ -89,7 +117,7 @@ class DooMaili
         else
         {
 
-             return self::errno();
+             return self::errno("From: <votre adress>@<domain>.<com>");
 
         }
 
@@ -201,7 +229,7 @@ class DooMaili
         if($cb !== null)
         {
 
-            $cb($status);
+            call_user_func($cb, $status);
 
         }
 
@@ -209,7 +237,9 @@ class DooMaili
 
     /**
     * setMailServer, fonction permettant de definir de quel serveur le mail sera envoyer
+    *
     * @param string, le nom de serveur, ou l'adresse IP du serveur
+    * @return $this
     */
     public function setMailServer($serverName)
     {
@@ -225,7 +255,9 @@ class DooMaili
 
     /**
     * setPort, fonction permettant de configurer le port smtp
+    *
     * @param string, le numero de port
+    * @return $this
     */
     public function setPort($port)
     {
@@ -241,7 +273,8 @@ class DooMaili
 
     }
     /**
-    * errno, fonction permettant de 
+    * errno, fonction permettant de
+    * @param string, message
     */
     private static function errno($msg)
     {
@@ -249,11 +282,16 @@ class DooMaili
         exit();
     }
 
-    private function prepareAttachement()
+    /**
+     * @param string $file
+     * @return $this
+     */
+    public function prepareAttachement($file)
     {
 
-        
-        
+        $this->fileAttachement[] = $file;
+        return $this;
+
     }
 
 }

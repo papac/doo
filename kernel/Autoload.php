@@ -7,7 +7,7 @@ namespace Doo;
 */
 class Autoload
 {
-	
+
 	public static function register()
 	{
 
