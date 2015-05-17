@@ -70,11 +70,9 @@ class DooMaili
     public function factory(array $information, $cb = null)
     {
 
-        if(!is_array($information))
-        {
+        if (!is_array($information)) {
 
-            if($cb !== null)
-            {
+            if ($cb !== null) {
 
                 return call_user_func($cb, self::FORMAT);
 
@@ -88,8 +86,7 @@ class DooMaili
         $this->subject = $information['subject'];
         $this->data = $information['data'];
 
-        if($cb !== null)
-        {
+        if ($cb !== null) {
 
             call_user_func($cb, self::FORMAT);
 
@@ -117,7 +114,7 @@ class DooMaili
         else
         {
 
-             return self::errno("From: <votre adress>@<domain>.<com>");
+             self::errno("From: <votre adress>@<domain>.<com>");
 
         }
 
