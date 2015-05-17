@@ -1,31 +1,42 @@
 <?php
 
-  use \Doo\Doo;
-      use \Doo\Autoload;
+    use \Doo\Doo;
+              use \Doo\Autoload;
 
-  require "../kernel/Autoload.php";
+    require "../kernel/Autoload.php";
+    require "../Mail-master/mail.php";
 
-  Autoload::register();
+    $mail = new Mail("dakia", "franck", "cucu", "je suis", "<p>je suis</p>");
 
-  Doo::setFileSize(400000);
+    var_dump($mail);
 
-  Doo::uploadFile($_FILES["file"], ["jpg", "png", "gif"], function($err)
-  {
-      echo $err->message;
-  });
+    Autoload::register();
 
-  Doo::init("mysql://root@localhost/test", function($err)
-  {
-      if($err) {
-         die($err->getMessage());
-      }
-  });
+    Doo::init("mysql://root@localhost/test", function($err)
+    {
+        if ($err instanceof \Exception) {
+            die($err->getMessage());
+        }
+    });
 
-  Doo::select("news", ["*"], function($err, $data)
-  {
-      if($err->error)
-      {
-          die($err->errorInfo);
-      }
-  });
+    Doo::select("news", ["*"], function($err, $data)
+    {
+        if ($err->error) {
+            die($err->errorInfo);
+        }
+
+        var_dump($data);
+    });
+
+    $mail = new \Doo\DooMaili();
+    $mail->setTypeMime("text/html");
+    $mail->to("test@gmail.com")->subject("coucou")->data("je suis au quartier")->send(function($status) {
+
+        if ($status) {
+            echo "Mail envoyer.";
+        } else {
+            echo "Mail non envoyer.";
+        }
+
+    });
 
