@@ -85,6 +85,7 @@ class DooMaili
 
         $this->boundaryHash = md5(date("r", time()));
         $this->typeMime = "text/plain";
+        $this->from = ini_get("smpt_from");
 
     }
 
@@ -300,6 +301,7 @@ class DooMaili
 
         if (count($this->additionnalHeader) > 1)
         {
+
             $this->setDefaultHeaders();
             $this->headers = implode(PHP_EOL, $this->additionnalHeader).PHP_EOL;
             $status = @mail($this->to, $this->subject, $this->data, $this->headers);
@@ -310,10 +312,13 @@ class DooMaili
 
         }
 
+        /** @var callable $cb */
         if ($cb !== null)
         {
 
-            call_user_func($cb, $status);
+            if (!empty($status)) {
+                call_user_func($cb, $status);
+            }
 
         }
 
@@ -346,13 +351,7 @@ class DooMaili
     public function setPort($port)
     {
 
-        if(is_string($port))
-        {
-
-            ini_set('smtp_port', $port);
-
-        }
-
+        ini_set('smtp_port', $port);
         return $this;
 
     }
@@ -384,7 +383,7 @@ class DooMaili
             $this->data .= "\n\n";
 
         }
-        var_dump($this->data);
+
         $this->data .= "--PHP-mixed-{$this->boundaryHash}--\n\n";
 
     }
