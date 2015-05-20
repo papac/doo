@@ -20,9 +20,31 @@ class Doodb {
     * e.g mysql://username:password@hostname:port/dbname
     */
 
-    public static function connection($sdn, $cb = null){
+    public static function connection($cb = null){
 
-        $tmp = explode("/", $sdn);
+        $stream = @file("../appconfig/app.conf");
+
+        if(!$stream)
+        {
+
+            if ($cb !== null)
+            {
+
+                call_user_func($cb, new Exception("Vérifiez le chemin de fichier app.conf situer dans appconfig"));
+
+            }
+            else
+            {
+
+                throw new Exception("Vérifiez le chemin de fichier app.conf situer dans appconfig");
+
+            }
+
+        }
+
+        $dsn = preg_replace("#[A-Z]+=|\n#", "", base64_decode($stream[0]));
+
+        $tmp = explode("/", $dsn);
 
         $config = explode("@", $tmp[2]);
         $userConfig = explode(":", $config[0]);

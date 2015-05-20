@@ -1,11 +1,15 @@
-Doo
-===
+## About Doo
 
 Create simple blog with Doo.php
 Developpe by `papac`
-
-__version 0.0.1__
-
+- Doo
+   *
+   *
+- DooMaili
+   * Sends mixed/multipart emails, (html and/or plaintext).
+   * Sends attachments
+   * Object-oriented.
+   * Uses PHP's built-in mail() function.
 ---
 ### Usage
 

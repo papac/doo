@@ -47,21 +47,21 @@ class Doo {
     * initialisation de la chaine de connection
     * e.g mysql://username:password@hostname:port/dbname
     */
-    public static function init($sdn, $cb = null)
+    public static function init($cb = null)
     {
 
-        self::$bdd = Doodb::connection($sdn, $cb);
+        self::$bdd = Doodb::connection($cb);
 
         if(self::$bdd !== null)
         {
-            
+
             if(self::$charset !== null)
             {
 
                 self::$bdd->exec("SET NAMES " . self::$charset);
-            
+
             }
-        
+
         }
 
     }
@@ -76,12 +76,12 @@ class Doo {
     {
 
         if(!in_array($charset, ["UTF8", "ISO-8859"])){
-            
+
             if($cb !== null)
             {
 
                 return call_user_func_array($cb, [new \Exception('Encodage non valide')]);
-                
+
             }
             else
             {
@@ -90,7 +90,7 @@ class Doo {
                 exit();
 
             }
-        
+
         }
         else
         {
@@ -148,7 +148,7 @@ class Doo {
         # Construction d'un SQL statement personnalisable
         if($where !== null && is_array($where))
         {
-            
+
             $c = count($where);
 
             if($c == 1)
@@ -162,7 +162,7 @@ class Doo {
 
                 if(is_array($order) && count($order) == 2)
                 {
-                    
+
                     trigger_error("Syntax error, le parametre apres la fonction est un where de ", E_WARNING);
                     exit();
 
@@ -203,31 +203,31 @@ class Doo {
             }
             else
             {
-        
+
                 $query .= " ORDER BY " . $order[0] . " ASC";
-        
+
             }
 
         }
         elseif(is_string($order))
         {
-        
+
             $limit = $order;
-        
+
         }
 
         if($limit !== null)
         {
-        
+
             $query .= " LIMIT " . $limit;
-        
+
         }
 
         if(self::$charset !== null)
         {
-        
+
             self::$bdd->exec("SET NAMES " . self::$charset);
-        
+
         }
 
         $req = self::$bdd->query($query);
@@ -381,14 +381,14 @@ class Doo {
 
                         if($hash !== null)
                         {
-                        
+
                             $filename = hash($hash, uniqid(rand(null, true)));
-                        
+
                         }else
                         {
 
                             $filename = $pathInfo->filename;
-                        
+
                         }
 
                         $ext = $pathInfo->extension;
@@ -441,7 +441,7 @@ class Doo {
         else
         {
 
-            # Status, fichier non uploadé 
+            # Status, fichier non uploadé
             $status = [
                 "status" => self::FAILURE,
                 "message" => self::FAILURE . ' : Le fichier n\'a pas pus être uploader.'
@@ -451,9 +451,9 @@ class Doo {
 
         if($cb !== null)
         {
-        
+
             call_user_func_array($cb, [(object) $status, isset($filename) ? $filename : null, isset($ext) ? $ext : null]);
-        
+
         }
 
     }
@@ -464,18 +464,18 @@ class Doo {
     */
     public static function setUploadedDir($path)
     {
-        
+
         if(is_string($path))
         {
-        
+
             self::$uploadDir = $path;
-        
+
         }else
         {
-        
+
             trigger_error("SVP, une chaine de caracter est demander.", E_WARNING);
             exit();
-        
+
         }
 
     }

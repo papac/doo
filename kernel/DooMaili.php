@@ -186,17 +186,9 @@ class DooMaili
 
         if (is_string($msg))
         {
-            if ($this->typeMime === "text/plain")
-            {
-                $this->text = $msg;
-                $this->text();
 
-            } else {
-
-                $this->html = $msg;
-                $this->html();
-
-            }
+            $this->text = $msg;
+            $this->dataMaker();
 
         }
         else
@@ -228,7 +220,7 @@ class DooMaili
     /**
      * addAttachementFile, fonction permettant d'ajouter une fichier
      *
-     * @param $file
+     * @param string $file
      * @return $this
      */
     public function addAttachementFile($file)
@@ -262,26 +254,13 @@ class DooMaili
     }
 
     /**
-     * html, fonction permettant de configurer les headers pour les text/html
-     */
-    private function html()
-    {
-
-        $this->data .= "--PHP-alt-{$this->boundaryHash}\n";
-        $this->data .= "Content-Type: text/html; charset=\"{$this->charset}\"\n";
-        $this->data .= "Content-Transfer-Encoding: 7bit\n\n";
-        $this->data .= $this->html."\n\n";
-
-    }
-
-    /**
      * text, fonction permettant de configurer les headers pour les text/plain
      */
-    private function text()
+    private function dataMaker()
     {
 
         $this->data .= "--PHP-alt-{$this->boundaryHash}\n";
-        $this->data .= "Content-Type: text/plain; charset=\"{$this->charset}\"\n";
+        $this->data .= "Content-Type: {$this->typeMime}; charset=\"{$this->charset}\"\n";
         $this->data .= "Content-Transfer-Encoding: 7bit\n\n";
         $this->data .= $this->text."\n\n";
 
@@ -289,7 +268,7 @@ class DooMaili
     /**
     * send, fonction de declanchement de l'envoie de mail
     *
-    * @param function, fonction de rappel pour recuperer l'etat apres envoie de mail
+    * @param callable $cb, fonction de rappel pour recuperer l'etat apres envoie de mail
     */
     public function send($cb = null)
     {
@@ -327,7 +306,7 @@ class DooMaili
     /**
     * setMailServer, fonction permettant de definir de quel serveur le mail sera envoyer
     *
-    * @param string, le nom de serveur, ou l'adresse IP du serveur
+    * @param string $serverName, le nom de serveur, ou l'adresse IP du serveur
     * @return $this
     */
     public function setMailServer($serverName)
@@ -335,7 +314,15 @@ class DooMaili
 
         if (is_string($serverName))
         {
+
             ini_set('SMTP', $serverName);
+
+        }
+        else
+        {
+
+            self::errno("Excepted parameter string");
+
         }
 
         return $this;
@@ -345,7 +332,7 @@ class DooMaili
     /**
     * setPort, fonction permettant de configurer le port smtp
     *
-    * @param string, le numero de port
+    * @param string $port, le numero de port
     * @return $this
     */
     public function setPort($port)
@@ -392,7 +379,6 @@ class DooMaili
      * setCharset, fonction permettant de redefinir l'encodage
      * @param string $charset
      */
-
     public function setCharset($charset)
     {
         $this->charset = $charset;
