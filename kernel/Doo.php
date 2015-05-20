@@ -26,6 +26,9 @@ class Doo {
     # configuration du jeu de caractere
     private static $charset = null;
 
+    # mail
+    public static mail = null;
+
     # Le mode de recuperation de des
     private static $modeDeRecuperationDeDonnee = \PDO::FETCH_OBJ;
 
@@ -47,6 +50,12 @@ class Doo {
     * initialisation de la chaine de connection
     * e.g mysql://username:password@hostname:port/dbname
     */
+
+    public function __construct()
+    {
+        self::$mail = new DooMaili();
+    }
+
     public static function init($cb = null)
     {
 
@@ -522,6 +531,22 @@ class Doo {
 
         self::$fileSize = (int) $fileSize;
 
+    }
+
+    public static function mail()
+    {
+        return new DooMaili();
+    }
+
+    public static function date($cfg = null) {
+        if($cfg !== null)
+        {
+
+            return new DooDateMaker($cfg);
+
+        }
+
+        return new DooDateMaker($cfg);
     }
 
     # Fichier, contenant un code simple en php, nous permettant d'executer de requete SQL.

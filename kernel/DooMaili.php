@@ -111,7 +111,7 @@ class DooMaili
         if (is_string($from))
         {
 
-            $this->from = $from;            
+            $this->from = $from;
 
         }
         else
@@ -135,9 +135,9 @@ class DooMaili
 
         if (is_string($to))
         {
-        
+
             $this->$to = $to;
-        
+
         }
         else
         {
@@ -145,7 +145,7 @@ class DooMaili
             self::errno("Excepted parameter string.");
 
         }
-        
+
         return $this;
 
     }
@@ -162,7 +162,7 @@ class DooMaili
         {
 
             $this->subject = $sub;
-            
+
         }
         else
         {
