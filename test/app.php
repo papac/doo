@@ -1,28 +1,42 @@
 <?php
 
-    require "../kernel/Autoload.php";
-
     use \Doo\Autoload;
     use \Doo\Doo;
 
-    Autoload::register();
+    require "../kernel/Autoload.php";
 
-    Doo::init(function($err) {
-        if($err instanceof \Exception)
-        {
+
+    Autoload::register();
+    Doo::init("mysql://root@localhost/web", function($err){
+        if($err !== null) {
+            var_dump($err);
             die($err->getMessage());
         }
     });
 
-    Doo::select("post", ["*"], function($err, $data)
+    $g = [];
+    Doo::select("post", ["*"], function($err, $data) use (&$g)
     {
-        if($err->error)
-        {
+        if($err instanceof \Exception) {
+            die($err->getMessage());
+        } else if ($err->error) {
             die($err->errorInfo);
         }
 
-        foreach($data as $k => $v){
-            echo "{$v->id}: {$v->content}<br/>";
-        }
-        
+        $g["post"] = $data;
+
     });
+
+    Doo::select("slider", ["*"], function($err, $data) use (&$g)
+    {
+        if($err instanceof \Exception) {
+            die($err->getMessage());
+        } else if ($err->error) {
+            die($err->errorInfo);
+        }
+
+        $g["slider"] = $data;
+
+    });
+
+    var_dump($g);

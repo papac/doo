@@ -18,16 +18,15 @@ class Doo {
     /**
     * Super constante, permetant de simplifier le information sur les erreurs
     */
-    const NOTERROR =  "<span style=\"color:red\">NOT ERROR</span>";
-    const ERROR =  "<span style=\"color:red\">ERROR</span>";
-    const SUCCESS =  "<span style=\"color:red\">SUCESS</span>";
-    const FAILURE =  "<span style=\"color:red\">FAILURE</span>";
+    const ERROR =  3;
+    const SUCCESS =  2;
+    const WARNING = 1;
 
     # configuration du jeu de caractere
     private static $charset = null;
 
     # mail
-    public static mail = null;
+    public static $mail = null;
 
     # Le mode de recuperation de des
     private static $modeDeRecuperationDeDonnee = \PDO::FETCH_OBJ;
@@ -56,10 +55,30 @@ class Doo {
         self::$mail = new DooMaili();
     }
 
-    public static function init($cb = null)
+    public static function init($dsn = null, $cb = null)
     {
 
-        self::$bdd = Doodb::connection($cb);
+        if($dsn !== null)
+        {
+            if(!is_string($dsn))
+            {
+                $cb = $dsn;
+            }
+            else
+            {
+                if($cb !== null)
+                {
+
+                    self::$bdd = Doodb::connection($dsn, $cb);
+
+                }
+                else
+                {
+                    self::$bdd = Doodb::connection($cb);
+                }
+            }
+        }
+
 
         if(self::$bdd !== null)
         {
@@ -78,6 +97,7 @@ class Doo {
     /**
     * setCharset, permet de reinitialiser le jeux de caracter
     * @param strting: encodage
+    * @param null cb
     * @return mixed
     */
 
@@ -95,7 +115,7 @@ class Doo {
             else
             {
 
-                trigger_error("Encodage non valide", E_USER_WARNING);
+                self::doException($cb, "Encodage non valide", self::WARNING);
                 exit();
 
             }
@@ -138,12 +158,13 @@ class Doo {
     * @param array [where = null]: condition supplementaire
     * @param boolean order: ORDER BY
     * @param string limit
+    * @throws \Exception
     */
 
     public static function select($table, $fields, $cb, $where = null, $order = false, $limit = null)
     {
 
-
+        self::doException($cb, "Executez en premier cette commande, Doo::init(dsn, cb). ", self::ERROR);
         /**
         * Utilisation global de la variable $bdd
         */
@@ -172,8 +193,7 @@ class Doo {
                 if(is_array($order) && count($order) == 2)
                 {
 
-                    trigger_error("Syntax error, le parametre apres la fonction est un where de ", E_WARNING);
-                    exit();
+                    self::doException($cb, "Syntax error, le parametre apres la fonction est un where de ");
 
                 }
                 else if(is_string($order))
@@ -247,12 +267,12 @@ class Doo {
         if(is_bool($req))
         {
 
-            $cb($err, []);
+            call_user_func_array($cb , [$err, []]);
 
         }else
         {
 
-            $cb($err, $req->fetchAll(self::$modeDeRecuperationDeDonnee));
+            call_user_func_array($cb, [$err, $req->fetchAll(self::$modeDeRecuperationDeDonnee)]);
 
         }
 
@@ -268,7 +288,7 @@ class Doo {
 
     public static function update($table, $fields, $where, $cb)
     {
-
+        self::doException($cb, "Executez en premier cette fonction, Doo::init(dsn, cb). <br/> ou verifiez cette fonction.");
         $query = "UPDATE " . $table . " SET " . implode(", ", $fields) . " WHERE " . $where;
 
         self::$bdd->exec($query);
@@ -286,6 +306,8 @@ class Doo {
 
     public static function insert($table, $fields, $cb)
     {
+
+        self::doException($cb, "Executez en premier cette commande, Doo::init(dsn, cb). ");
 
         $query = "INSERT INTO {$table} SET ";
 
@@ -416,8 +438,8 @@ class Doo {
 
                         # Status, extension du fichier
                         $status = [
-                            'status' => self::FAILURE,
-                            'message' => self::surround(self::FAILURE . ': Availabe File, verify file type.', '#E1371A')
+                            'status' => self::ERROR,
+                            'message' => self::surround('Availabe File, verify file type.', self::ERROR)
                         ];
 
                     }
@@ -428,8 +450,8 @@ class Doo {
 
                     # Status, la taille est invalide
                     $status = [
-                        'status' => self::FAILURE,
-                        'message' => self::surround('File is more big, max size ' . self::$fileSize. ' octets.', '#E1371A')
+                        'status' => self::ERROR,
+                        'message' => self::surround('File is more big, max size ' . self::$fileSize. ' octets.', self::ERROR)
                     ];
 
                 }
@@ -440,8 +462,8 @@ class Doo {
 
                 # Status, fichier erroné.
                 $status = [
-                    "status" => self::FAILURE,
-                    "message" => self::surround('Le fichier possède des erreurs.', "#E1371A")
+                    "status" => self::ERROR,
+                    "message" => self::surround('Le fichier possède des erreurs.', self::ERROR)
                 ];
 
             }
@@ -452,8 +474,8 @@ class Doo {
 
             # Status, fichier non uploadé
             $status = [
-                "status" => self::FAILURE,
-                "message" => self::FAILURE . ' : Le fichier n\'a pas pus être uploader.'
+                "status" => self::ERROR,
+                "message" => self::suround(' : Le fichier n\'a pas pus être uploader.', self::ERROR)
             ];
 
         }
@@ -502,7 +524,7 @@ class Doo {
         return (object) [
             "error" => $err[2] !== null ? true: false,
             "query" => $query,
-            "errorInfo" => $err[2] !== null ? self::ERROR .": ". str_replace("' ", " ", preg_replace("#'[a-zA-Z_-]+\.#", "", $err[2])) : self::NOTERROR
+            "errorInfo" => $err[2] !== null ? self::surround(str_replace("' ", " ", preg_replace("#'[a-zA-Z_-]+\.#", "", $err[2])), self::ERROR) : self::SUCCESS
         ];
 
     }
@@ -510,14 +532,25 @@ class Doo {
     /**
     * surround, fonction permettant de formater en HTML un message d'error
     *
-    * @param string, message.
-    * @param string, color
-    * @return string, message formater
+    * @param string $message.
+    * @param int, $errCode
+    * @return string $message, formater
     */
-    private static function surround($message, $color)
+    private static function surround($message, $errCode)
     {
-
-        return '<span style="color:' . $color . '">' . $message . '</span>';
+        if($errCode === self::ERROR)
+        {
+            $color = "#FF5B60";
+        }
+        else if($errCode === self::SUCCESS)
+        {
+            $color = "#8BFF88";
+        }
+        else
+        {
+            $color = "#F7CF59";
+        }
+        return '<span style="font-family: verdana; font-size: 15px; background-color:' . $color . '; color: white; display: block; padding: 10px; border-radius: 5px;">' . $message . '</span>';
 
     }
 
@@ -533,11 +566,22 @@ class Doo {
 
     }
 
+    /**
+     * mail, fonction permettant d'initialiser la fonctionnalité envoye-mail du systeme
+     *
+     * @return \Doo\DooMaili
+     */
     public static function mail()
     {
         return new DooMaili();
     }
 
+    /**
+     * date, fonction de recuperation de la date
+     *
+     * @param null $cfg
+     * @return \Doo\DooDateMaker
+     */
     public static function date($cfg = null) {
         if($cfg !== null)
         {
@@ -547,6 +591,23 @@ class Doo {
         }
 
         return new DooDateMaker($cfg);
+    }
+
+    private static function doException($cb = null, $message)
+    {
+
+        if(self::$bdd === null)
+        {
+            $err = new \Exception(self::surround($message, isset(func_get_args()[2]) ? func_get_args()[2] : self::ERROR));
+
+            if($cb !== null)
+            {
+                call_user_func_array($cb, [$err, null]);
+                die();
+            }
+
+            throw $err;
+        }
     }
 
     # Fichier, contenant un code simple en php, nous permettant d'executer de requete SQL.
