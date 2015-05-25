@@ -11,17 +11,12 @@ namespace Doo;
 /**
 * Doo date maker
 * Create date 05/05/2015
+*
+* Class DooDateMaker
+*
+* @package Doo
 */
-/**
- * Class DooDateMaker
- *
- * @package Doo
- */
-/**
- * Class DooDateMaker
- *
- * @package Doo
- */
+
 class DooDateMaker
 {
 

@@ -45,6 +45,9 @@ class Doo {
     # taille du fichier
     private static $fileSize = 2000000;
 
+    # mail sigleton
+    private static $mail = null;
+
     /**
     * initialisation de la chaine de connection
     * e.g mysql://username:password@hostname:port/dbname
@@ -348,11 +351,20 @@ class Doo {
     public static function delete($table, $where, $cb = null)
     {
 
-        $query = "DELETE FROM " . $table . " WHERE id = :id";
+        $query = "DELETE FROM " . $table . " WHERE"; 
+
+        $i = 0;
+        
+        foreach ($where as $key => $value) {
+            $query .= (i > 0 ? ' AND' : '') . " ${key} = :{$key}";
+            $i++;
+        }
 
         $req = self::$bdd->prepare($query);
 
-        $req->bindValue(":id", $where["id"], \PDO::PARAM_INT);
+        foreach ($where as $key => $value) {
+            $req->bindValue("{$key}", $value, is_string($value) ? PDO::PARAM_STR : PDO::PARAM_INT);
+        }
 
         $req->execute();
         if($cb !== null)
@@ -573,7 +585,14 @@ class Doo {
      */
     public static function mail()
     {
-        return new DooMaili();
+        if(self$mail === null)
+        {
+
+            self::$mail new DooMaili();
+        
+        }
+
+        return self::$mail;
     }
 
     /**
