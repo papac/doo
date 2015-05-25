@@ -1,5 +1,5 @@
 {
-    "name": "doo/doo",
+    "name": "papac/doo",
     "description": "The simple system, for create simple app web eg. blog, chat, APIREST",
     "license": "MIT",
     "authors": [
@@ -9,7 +9,7 @@
         }
     ],
     "psr-4" : {
-        "Doo\\": "Kernel"
+        "Doo\\": "kernel"
     },
     "minimum-stability": "dev",
     "require": {}

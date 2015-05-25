@@ -1,9 +1,8 @@
 <?php
 
+    require __DIR__ ."/../kernel/Autoload.php";
     use \Doo\Autoload;
     use \Doo\Doo;
-
-    require "../kernel/Autoload.php";
 
 
     Autoload::register();
