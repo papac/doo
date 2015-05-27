@@ -129,5 +129,5 @@ lien
         }
     });
 
-    # Doo::mail, Utilise un le design pattern sigleton.
+    # Doo::mail, Utilise un le design pattern singleton.
 ```
