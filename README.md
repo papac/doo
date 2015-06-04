@@ -38,11 +38,11 @@ lien
 ```
 #### Selectionner dans données.
 ```php
-    
+
     # Serveur de base de donnée déjà connecté.
-    
+
     $collection = new StdClass;
-    
+
     $cb = function($err, $res) use (&$collection){
 
         if($err->error)
@@ -51,7 +51,7 @@ lien
         }
 
         $collection->res = $res;
-        
+
     };
 
     Doo::select("nomDeLaTable", ["colonne1", "colonne2", "..."], $cb);
@@ -61,7 +61,7 @@ lien
 
 #### Inserer des données
 ```php
-    
+
     # Serveur de base de donnée déjà connecté.
 
     $collectionDeDonneeAInserer = [
@@ -80,12 +80,12 @@ lien
 
 #### Supprimer ou mise à jour des données
 ```php
-    
+
     # Serveur de base de donnée déjà connecté.
 
     Doo::[delete|update]("table", ["id" => 1], function($err)
     {
-        
+
         if($err->error)
         {
             die($err->errorInfo);
@@ -96,7 +96,7 @@ lien
 
 #### Envoie de mail
 ```php
-    
+
     # manespace charger
     use \Doo\Doo;
     use \Doo\Autoload;
@@ -129,5 +129,5 @@ lien
         }
     });
 
-    # Doo::mail, Utilise un le design pattern singleton.
+    # Doo::mail, Utilise un design pattern singleton.
 ```
