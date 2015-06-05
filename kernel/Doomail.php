@@ -12,16 +12,15 @@ namespace Doo;
 /**
 * DooMail, classe permettant d'envoyer des mails
 */
-class Doomail
-{
+class Doomail {
 
     /**
      *
      */
-    const FORMAT = "<pre>[
-        'to' => to@maildomain.com,
-        'subject' => you subject,
-        'data' => your data
+    const HELP = "<pre>[
+        <span style=\"color: #478\">'to'</span> => <span style=\"color: #578\">to@maildomain.com</span>,
+        <span style=\"color: #478\">'subject'</span> => <span style=\"color: #578\">you subject</span>,
+        <span style=\"color: #478\">'data'</span> => <span style=\"color: #578\">your data</span>
     ]</pre>";
 
     /**
@@ -80,8 +79,7 @@ class Doomail
      */
     private $html;
 
-    function __construct()
-    {
+    function __construct() {
 
         $this->boundaryHash = md5(date("r", time()));
         $this->typeMime = "text/plain";
@@ -94,9 +92,10 @@ class Doomail
      *
      * @param string $mime
      */
-    public function setTypeMime($mime)
-    {
+    public function setTypeMime($mime) {
+
         $this->typeMime = $mime;
+
     }
 
     /**
@@ -106,22 +105,20 @@ class Doomail
     * @param DooMaili, Object DooMaili
     * @return $this
     */
-    public function from($from)
-    {
-        if (is_string($from))
-        {
+    public function from($from) {
+
+        if (is_string($from)) {
 
             $this->from = $from;
 
-        }
-        else
-        {
+        } else {
 
-             self::errno("From: <votre adress>@<domain>.<com>");
+            self::errno("From: <votre adress>@<domain>.<com>");
 
         }
 
         return $this;
+
     }
 
     /**
@@ -130,17 +127,13 @@ class Doomail
     * @param string $to
     * @return DooMaili, Object DooMaili
     */
-    public function to($to)
-    {
+    public function to($to) {
 
-        if (is_string($to))
-        {
+        if (is_string($to)) {
 
             $this->$to = $to;
 
-        }
-        else
-        {
+        } else {
 
             self::errno("Excepted parameter string.");
 
@@ -156,16 +149,13 @@ class Doomail
     * @param string $sub
     * @return DooMaili, Object DooMaili
     */
-    public function subject($sub){
+    public function subject($sub) {
 
-        if (is_string($sub))
-        {
+        if (is_string($sub)) {
 
             $this->subject = $sub;
 
-        }
-        else
-        {
+        } else {
 
             self::errno("Excepted parameter string.");
 
@@ -181,18 +171,14 @@ class Doomail
     * @param string $msg
     * @return DooMaili, Object DooMaili
     */
-    public function data($msg)
-    {
+    public function data($msg) {
 
-        if (is_string($msg))
-        {
+        if (is_string($msg)) {
 
             $this->text = $msg;
             $this->dataMaker();
 
-        }
-        else
-        {
+        } else {
 
             self::errno("Excepted parameter string.");
 
@@ -209,8 +195,7 @@ class Doomail
     * @param string $value, la valeur de nom enter
     * @return DooMaili $this
     */
-    public function addHeader($name, $value)
-    {
+    public function addHeader($name, $value) {
 
         $this->additionnalHeader[] = "{$name}: {$value}\r\n";
         return $this;
@@ -223,10 +208,9 @@ class Doomail
      * @param string $file
      * @return $this
      */
-    public function addAttachementFile($file)
-    {
-        if (is_string($file))
-        {
+    public function addAttachementFile($file) {
+
+        if (is_string($file)) {
 
             $this->attachementFile[] = $file;
 
@@ -239,8 +223,7 @@ class Doomail
     /**
      * setDefaultHeaders, fonction permettant de definir les headers par defaut
      */
-    private function setDefaultHeaders()
-    {
+    private function setDefaultHeaders() {
 
         $this->additionnalHeader[] = 'MIME-Version: 1.0';
         $this->additionnalHeader[] = "From: {$this->from}";
@@ -256,8 +239,7 @@ class Doomail
     /**
      * text, fonction permettant de configurer les headers pour les text/plain
      */
-    private function dataMaker()
-    {
+    private function dataMaker() {
 
         $this->data .= "--PHP-alt-{$this->boundaryHash}\n";
         $this->data .= "Content-Type: {$this->typeMime}; charset=\"{$this->charset}\"\n";
@@ -270,16 +252,14 @@ class Doomail
     *
     * @param callable $cb, fonction de rappel pour recuperer l'etat apres envoie de mail
     */
-    public function send($cb = null)
-    {
+    public function send($cb = null) {
 
-        if (count($this->attachementFile) >= 1)
-        {
+        if (count($this->attachementFile) >= 1) {
+
             $this->prepareAttachementFile();
         }
 
-        if (count($this->additionnalHeader) > 1)
-        {
+        if (count($this->additionnalHeader) > 1) {
 
             $this->setDefaultHeaders();
             $this->headers = implode(PHP_EOL, $this->additionnalHeader).PHP_EOL;
@@ -292,8 +272,7 @@ class Doomail
         }
 
         /** @var callable $cb */
-        if ($cb !== null)
-        {
+        if ($cb !== null) {
 
             if (!empty($status)) {
                 call_user_func($cb, $status);
@@ -309,17 +288,13 @@ class Doomail
     * @param string $serverName, le nom de serveur, ou l'adresse IP du serveur
     * @return $this
     */
-    public function setMailServer($serverName)
-    {
+    public function setMailServer($serverName) {
 
-        if (is_string($serverName))
-        {
+        if (is_string($serverName)) {
 
             ini_set('SMTP', $serverName);
 
-        }
-        else
-        {
+        } else {
 
             self::errno("Excepted parameter string");
 
@@ -335,8 +310,7 @@ class Doomail
     * @param string $port, le numero de port
     * @return $this
     */
-    public function setPort($port)
-    {
+    public function setPort($port) {
 
         ini_set('smtp_port', $port);
         return $this;
@@ -347,19 +321,19 @@ class Doomail
     *
     * @param string, message
     */
-    private static function errno($msg)
-    {
+    private static function errno($msg) {
+
         trigger_error($msg, E_WARNING);
         exit();
+
     }
 
     /**
      * prepareAttachement, fonction permettant d'ajouter une pièce-jointe
      */
-    private function prepareAttachementFile()
-    {
-        foreach($this->attachementFile as $file)
-        {
+    private function prepareAttachementFile() {
+
+        foreach($this->attachementFile as $file) {
 
             $filename  = basename($file);
             $this->data .= "--PHP-mixed-{$this->boundaryHash}\n";
@@ -379,9 +353,10 @@ class Doomail
      * setCharset, fonction permettant de redefinir l'encodage
      * @param string $charset
      */
-    public function setCharset($charset)
-    {
+    public function setCharset($charset) {
+
         $this->charset = $charset;
+
     }
 
 }
