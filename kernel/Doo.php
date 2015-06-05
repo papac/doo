@@ -13,7 +13,7 @@ namespace Doo;
  *
  * @package Doo
  */
-class Doo {
+class Doo extends DooData{
 
     /**
     * Super constante, permetant de simplifier le information sur les erreurs
@@ -55,7 +55,7 @@ class Doo {
 
     public function __construct()
     {
-        self::$mail = new DooMaili();
+        self::$mail = new Doomail();
     }
 
     public static function init($dsn = null, $cb = null)
@@ -72,7 +72,7 @@ class Doo {
                 if($cb !== null)
                 {
 
-                    self::$bdd = Doodb::connection($dsn, $cb);
+                    self::$bdd = Doo::connection($dsn, $cb);
 
                 }
                 else
@@ -167,10 +167,8 @@ class Doo {
     public static function select($table, $fields, $cb, $where = null, $order = false, $limit = null)
     {
 
-        self::doException($cb, "Executez en premier cette commande, Doo::init(dsn, cb). ", self::ERROR);
-        /**
-        * Utilisation global de la variable $bdd
-        */
+        self::doException($cb, "Executez en premier cette commande, Doo::init(dsn, cb). ");
+
         # Une chaine contenant un liste de colonne des elements en visualiser
         $fields = implode(", ", $fields);
 
@@ -184,31 +182,26 @@ class Doo {
 
             $c = count($where);
 
-            if($c == 1)
-            {
+            if($c == 1) {
 
                 $query .= " WHERE " . implode(",", $where);
 
-            }
-            else if($c == 2)
-            {
+            } else if($c == 2) {
 
-                if(is_array($order) && count($order) == 2)
-                {
-
+                if(is_array($order) && count($order) == 2) {
+                    # Emission d'erreur
                     self::doException($cb, "Syntax error, le parametre apres la fonction est un where de ");
 
                 }
-                else if(is_string($order))
-                {
+                else if(is_string($order)) {
+
                     $limit = $order;
+
                 }
 
-            }
-            else
-            {
-                if(is_string($order))
-                {
+            } else {
+
+                if(is_string($order)) {
 
                     $limit = $order;
                     $order = $where;
@@ -216,33 +209,27 @@ class Doo {
                 }
             }
 
-        }
-        elseif(is_string($where))
-        {
+        } else if(is_string($where)) {
 
             $limit = $where;
 
         }
 
-        if(is_array($order) && count($order) == 2)
-        {
+        if(is_array($order) && count($order) == 2) {
 
-            if(end($order) === true)
-            {
+            $query .= " ORDER BY " . $order[0];
 
-                $query .= " ORDER BY " . $order[0] . " DESC";
+            if(end($order) === true) {
 
-            }
-            else
-            {
+                 $query .= " DESC";
 
-                $query .= " ORDER BY " . $order[0] . " ASC";
+            } else {
+
+                $query .= " ASC";
 
             }
 
-        }
-        elseif(is_string($order))
-        {
+        } elseif(is_string($order)) {
 
             $limit = $order;
 
@@ -286,17 +273,52 @@ class Doo {
     * @param string table: la table sur laquelle faire la selection
     * @param array fields: liste de colonne à mettre a jour
     * @param function cb: fonction de recuperation des erreurs et des donnees
-    * @param string where: where condition
+    * @param string where: where condition, { id = 2 and }
     */
 
-    public static function update($table, $fields, $where, $cb)
+    public static function update($table, $fields, $cb == null, $where = null)
     {
         self::doException($cb, "Executez en premier cette fonction, Doo::init(dsn, cb). <br/> ou verifiez cette fonction.");
-        $query = "UPDATE " . $table . " SET " . implode(", ", $fields) . " WHERE " . $where;
+
+        if($cb !== null) {
+
+            if(is_string($cb)) {
+
+                $where = $cb;
+                $cb = null;
+
+            }
+        }
+
+        $field = '';
+        $i = 0;
+
+        foreach($fields as $key => $value) {
+
+            if(is_string($value)) {
+                $value = "'{$value}'";
+            }
+
+            $field .= ($i > 0 ? ", " : "") .  "{$key} = {$value}";
+            $i++;
+
+        }
+
+        $query = "UPDATE " . $table . " SET " . $field;
+
+        if(is_string($where)) {
+
+            $query .= " WHERE " . $where;
+
+        }
 
         self::$bdd->exec($query);
 
-        $cb(self::getError(self::$bdd->errorInfo(), $query));
+        if($cb !== null) {
+
+            call_user_func($cb, self::getError(self::$bdd->errorInfo(), $query));
+
+        }
 
     }
 
@@ -348,13 +370,21 @@ class Doo {
     * @param function cb: fonction de recuperation des erreurs et des donnees
     */
 
-    public static function delete($table, $where, $cb = null)
+    public static function delete($table, $cb = null, $where = null)
     {
 
-        $query = "DELETE FROM " . $table . " WHERE"; 
+        doException($cb, "Executez en premier cette commande, Doo::init(dsn, cb). ");
+
+        $query = "DELETE FROM " . $table . " WHERE";
 
         $i = 0;
-        
+
+        if($where === null) {
+
+            self::doException($cb, "Syntaxe error", self::ERROR);
+
+        }
+
         foreach ($where as $key => $value) {
             $query .= (i > 0 ? ' AND' : '') . " ${key} = :{$key}";
             $i++;
@@ -367,6 +397,7 @@ class Doo {
         }
 
         $req->execute();
+
         if($cb !== null)
         {
             call_user_func($cb, [self::getError(self::$bdd->errorInfo(), $query)]);
@@ -385,7 +416,7 @@ class Doo {
 
     public static function uploadFile($file, array $extension, $cb = null, $hash = null)
     {
-
+        $file = (object) $file;
         if(is_array($extension))
         {
 
@@ -400,7 +431,7 @@ class Doo {
         }
 
         # Si le fichier est bien dans le repertoir tmp de PHP
-        if(is_uploaded_file($file["tmp_name"]))
+        if(is_uploaded_file($file->tmp_name))
         {
 
             if(!is_dir(self::$uploadDir))
@@ -411,13 +442,13 @@ class Doo {
             }
 
             # Si le fichier est bien uploader, avec aucune error
-            if($file["error"] === 0)
+            if($file->error === 0)
             {
 
-                if($file["size"] <= self::$fileSize)
+                if($file->size <= self::$fileSize)
                 {
 
-                    $pathInfo = (object) pathinfo($file["name"]);
+                    $pathInfo = (object) pathinfo($file->name);
 
                     if(in_array($pathInfo->extension, $extensionValide))
                     {
@@ -436,7 +467,7 @@ class Doo {
 
                         $ext = $pathInfo->extension;
 
-                        move_uploaded_file($file["tmp_name"], self::$uploadDir . "/" . $filename . '.' . $ext);
+                        move_uploaded_file($file->tmp_name, self::$uploadDir . "/" . $filename . '.' . $ext);
 
                         # Status, fichier uploadé
                         $status = [
@@ -508,15 +539,13 @@ class Doo {
     public static function setUploadedDir($path)
     {
 
-        if(is_string($path))
-        {
+        if(is_string($path)) {
 
             self::$uploadDir = $path;
 
-        }else
-        {
+        } else {
 
-            trigger_error("SVP, une chaine de caracter est demander.", E_WARNING);
+            self::doException(null, "SVP, une chaine de caracter est demander.");
             exit();
 
         }
@@ -533,10 +562,14 @@ class Doo {
     private static function getError($err, $query)
     {
 
+        $orign = preg_replace("#'[a-zA-Z_-]+\.#", "", $err[2]);
+
         return (object) [
             "error" => $err[2] !== null ? true: false,
             "query" => $query,
-            "errorInfo" => $err[2] !== null ? self::surround(str_replace("' ", " ", preg_replace("#'[a-zA-Z_-]+\.#", "", $err[2])), self::ERROR) : self::SUCCESS
+            "errorInfo" => $err[2] !== null
+                            ? self::surround(str_replace("' ", " ", $orign), self::ERROR)
+                            : self::SUCCESS
         ];
 
     }
@@ -548,20 +581,23 @@ class Doo {
     * @param int, $errCode
     * @return string $message, formater
     */
-    private static function surround($message, $errCode)
+    private static function surround($message, $errCode = null)
     {
-        if($errCode === self::ERROR)
-        {
+
+        if($errCode === self::ERROR) {
+
             $color = "#FF5B60";
-        }
-        else if($errCode === self::SUCCESS)
-        {
+
+        } else if($errCode === self::SUCCESS) {
+
             $color = "#8BFF88";
-        }
-        else
-        {
+
+        } else {
+
             $color = "#F7CF59";
+
         }
+
         return '<span style="font-family: verdana; font-size: 15px; background-color:' . $color . '; color: white; display: block; padding: 10px; border-radius: 5px;">' . $message . '</span>';
 
     }
@@ -571,8 +607,7 @@ class Doo {
     *
     * @param int, nouvelle taille des fichier a uploader
     */
-    public static function setFileSize($fileSize)
-    {
+    public static function setFileSize($fileSize) {
 
         self::$fileSize = (int) $fileSize;
 
@@ -583,16 +618,16 @@ class Doo {
      *
      * @return \Doo\DooMaili
      */
-    public static function mail()
-    {
-        if(self$mail === null)
-        {
+    public static function mail() {
 
-            self::$mail new DooMaili();
-        
+        if(self$mail === null) {
+
+            self::$mail new Doomail();
+
         }
 
         return self::$mail;
+
     }
 
     /**
@@ -601,22 +636,22 @@ class Doo {
      * @param null $cfg
      * @return \Doo\DooDateMaker
      */
-    public static function date($cfg = null) {
-        if($cfg !== null)
-        {
+    public static function date($timestanp = null) {
 
-            return new DooDateMaker($cfg);
+        if($timestanp !== null) {
+
+            return new DoodateMaker($timestanp);
 
         }
 
-        return new DooDateMaker($cfg);
+        return new DoodateMaker();
+
     }
 
-    private static function doException($cb = null, $message)
-    {
+    private static function doException($cb = null, $message) {
 
-        if(self::$bdd === null)
-        {
+        if(self::$bdd === null) {
+
             $err = new \Exception(self::surround($message, isset(func_get_args()[2]) ? func_get_args()[2] : self::ERROR));
 
             if($cb !== null)
@@ -627,7 +662,8 @@ class Doo {
 
             throw $err;
         }
+
     }
 
-    # Fichier, contenant un code simple en php, nous permettant d'executer de requete SQL.
 }
+t

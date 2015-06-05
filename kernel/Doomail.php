@@ -12,7 +12,7 @@ namespace Doo;
 /**
 * DooMail, classe permettant d'envoyer des mails
 */
-class DooMaili
+class Doomail
 {
 
     /**

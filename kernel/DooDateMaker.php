@@ -17,8 +17,7 @@ namespace Doo;
 * @package Doo
 */
 
-class DooDateMaker
-{
+class DoodateMaker {
 
     /**
      * @var

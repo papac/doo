@@ -12,8 +12,7 @@ namespace Doo;
 /**
 * Doodata, class Doo permettant de crypter et decripter de donnee
 */
-class Doodata
-{
+abstract class Doodata extends Doodb {
 
 	private static $part = "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
 	public static $mode = MCRYPT_MODE_CBC;
@@ -28,7 +27,7 @@ class Doodata
 	* @return string, resultat
 	*/
 
-	public static function decrypto($data, $cb = null)
+	protect static function decrypto($data, $cb = null)
 	{
 
 		$decode = base64_decode($data);
@@ -51,7 +50,7 @@ class Doodata
 	* @param function, une fonction de callback.
 	* @return string, resultat
 	*/
-	public static function crypto($data, $cb = null)
+	protect static function crypto($data, $cb = null)
 	{
 
 		# On recupere la taille de la donnee.

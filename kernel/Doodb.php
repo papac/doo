@@ -8,7 +8,7 @@
 */
 namespace Doo;
 
-class Doodb {
+abstract class Doodb {
 
     /**
      * @param null $dsn
@@ -16,7 +16,7 @@ class Doodb {
      * @return null|\PDO
      * @throws \Exception
      */
-    public static function connection($dsn = null, $cb = null){
+    protect static function connection($dsn = null, $cb = null){
 
         if($dsn !== null)
         {
@@ -31,7 +31,7 @@ class Doodb {
 
         if($dsn === null)
         {
-            $stream = @file("../appconfig/app.conf");
+            $stream = @file_get_contents("../appconfig/app.conf");
 
             if(!$stream)
             {
@@ -52,6 +52,7 @@ class Doodb {
             }
 
             $dsn = preg_replace("#[A-Z]+=|\n#", "", base64_decode($stream[0]));
+
         }
 
         $tmp = explode("/", $dsn);
