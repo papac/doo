@@ -5,13 +5,13 @@
     use \Doo\Doo;
 
 
+    $tint = time();
+
     Autoload::register();
 
     Doo::init(function($err){
 
-        if($err !== null) {
-
-            var_dump($err);
+        if($err) {
 
             die($err->getMessage());
 
@@ -25,6 +25,7 @@
 
         Doo::select($value, ["*"], function($err, $data) use (&$g, $value)
         {
+
             if($err instanceof \Exception) {
 
                 die($err->getMessage());
@@ -41,4 +42,5 @@
 
     }
 
-    var_dump($g);
+    echo "Temps d'excution " . (time() - $tint) . "ms";
+

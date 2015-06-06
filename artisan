@@ -1,0 +1,111 @@
+#!/usr/bin/evn php
+<?php
+
+	define("PROJECT_CREATED", 3);
+    define("APP_NAME_NOT_VALIDE", 4);
+    define("APP_EXISTS", 5);
+    define("APP_NOT_GIVEN", 7);
+
+    define("DSN_NOT_VALIDE", 1);
+    define("DSN_CREATED", 2);
+    define("DSN_CONF_EXISTS", 6);
+
+ 	switch($argv[1]) {
+
+        case "dsn":
+
+            if(!empty($argv[2]) && $argv[2] == "--remove") {
+
+                if(!is_dir("Doo")) {
+
+                    die("You aren't in your project folder.\n Do cd MyAppFolder and execute command \n\tphp artisan dsn Your-dsn");
+                
+                }
+
+                $status = @shell_exec("rm -r ./.config 2> ./.log");
+
+                if(is_null($status)) {
+
+                    die("Dsn-config not-found.\n");
+
+                }
+
+                die("Your-dsn is removed.\n");
+
+            } else if(isset($argv[2]) && $argv[2] != "--remove"  && !isset($argv[3])) {
+
+                createDsn($argv[2], 'new', ".");
+                die("Dsn-config created.\n");
+            
+            } else if (isset($argv[2]) && isset($argv[3]) && $argv[3] == "--update") {
+
+                createDsn($argv[2], 'update', ".");
+                die("Up-to-date dsn success.\n");
+
+            } else {
+
+                die("Fatal error due to not value given at dsn command\nUsage : artisan dsn mysql://username@localhost/database\n\n\t--update To update Your dsn\n");
+            
+            }
+
+            break;
+    }
+
+	function verifyDsn($dns) {
+
+	    return preg_match("#(pgsql|mysql|sqlite)://[\S]+:?([\S]+)?@[\S]:?([\S]+)/[\w\d]+#", $dns);
+
+	}
+
+	function createDsn($dsn, $action, $path) {
+
+	    if($action === "update") {
+
+	        if(file_exists("${path}/.conf/.dsn")) {
+
+	            file_put_contents("${path}/.config/.dsn", "DNS=" . base64_encode($dsn));
+
+	        } else {
+
+	            createDsn($dsn, "new", $path);
+	        
+	        }
+	    
+	    } else if ($action === "new") {
+
+	        if(!verifyDsn($dsn)) {
+	             
+	        }
+
+	        if(is_dir("./.config")) {
+
+	            makeMessage(DSN_CONF_EXISTS);
+
+	        }
+
+	        mkdir("{$path}/.config", 0777);
+	        touch("{$path}/.config/.dsn");
+	        file_put_contents("{$path}/.config/.dsn", base64_encode($dsn));
+	    }
+	}
+
+	function makeMessage($errno = null) {
+
+    if($errno === DSN_NOT_VALIDE) {
+
+        die("Your-Dsn is not valide.\n\tUsage dsn e.g mysql://username[:password]@hostname[:port]/database");
+
+    } else if($errno === APP_NAME_NOT_VALIDE) {
+
+        die("Project name is not valable");
+
+    } else if($errno === DSN_CONF_EXISTS) {
+
+        die("A other Dsn-config exist, so update it or remove it.\nUsage doo dsn yourdsn --update, to update\n");
+
+    } else if($errno === APP_EXISTS) {
+
+        die("Project exsits in this folder.\n\tUsage doo rename /lost/path /new/path app\n");
+
+    }
+}

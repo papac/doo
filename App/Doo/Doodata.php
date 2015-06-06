@@ -27,7 +27,8 @@ abstract class Doodata extends Doodb {
 	* @return string, resultat
 	*/
 
-	protected static function decrypto($data, $cb = null) {
+	protect static function decrypto($data, $cb = null)
+	{
 
 		$decode = base64_decode($data);
 		$r = mcrypt_decrypt(MCRYPT_RIJNDAEL_128, self::$key, $decode, self::$mode, self::$part);
@@ -49,7 +50,7 @@ abstract class Doodata extends Doodb {
 	* @param function, une fonction de callback.
 	* @return string, resultat
 	*/
-	protected static function crypto($data, $cb = null)
+	protect static function crypto($data, $cb = null)
 	{
 
 		# On recupere la taille de la donnee.

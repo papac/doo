@@ -16,86 +16,139 @@ abstract class Doodb {
      * @return null|\PDO
      * @throws \Exception
      */
-    protect static function connection($dsn = null, $cb = null){
+    protected static function connection($r = null, $cb = null){
 
-        if($dsn !== null)
-        {
-
-            if(!is_string($dsn))
-            {
-
-                $cb = $dsn;
-
-            }
-        }
-
-        if($dsn === null)
-        {
-            $stream = @file_get_contents("../appconfig/app.conf");
-
-            if(!$stream)
-            {
-
-                if ($cb !== null)
-                {
-
-                    call_user_func($cb, new \Exception("Vérifiez le chemin de fichier app.conf situer dans appconfig"));
-
-                }
-                else
-                {
-
-                    throw new \Exception("Vérifiez le chemin de fichier app.conf situer dans appconfig");
-
-                }
+        $dir = str_replace("\\", "/", __DIR__);
+        
+        if($r !== null) {
+            
+            if(!is_string($r)) {
+            
+                $cb = $r;
+                $r = self::readConfigurationFile($dir);
 
             }
 
-            $dsn = preg_replace("#[A-Z]+=|\n#", "", base64_decode($stream[0]));
+        } else {
 
+            $r = self::readConfigurationFile($dir);
+            
         }
 
-        $tmp = explode("/", $dsn);
+        self::errorListener($r, $cb);
 
-        $config = @explode("@", $tmp[2]);
-        $userConfig = @explode(":", $config[0]);
-        $hostConfig = @explode(":", $config[1]);
+        $d = self::makeDsn($r);
 
-        $host = @$hostConfig[0];
-        $port = isset($hostConfig[1]) ? @$hostConfig[1] : '';
+        # Mise en forme de configuration de dns
 
-        $user = @$userConfig[0];
-        $password = isset($userConfig[1]) ? @$userConfig[1] : '';
-
-        $dbname = @$tmp[3];
-        $engine = @$tmp[0];
-
-        try{
+        try {
 
             # Instantiation de la connection via le driver PDO
-            $bdd = new \PDO("${engine}:host=${host};dbname=${dbname}", "${user}", "${password}");
+            $bdd = new \PDO($d->dsn, $d->user, $d->pass);
 
-        }catch(\Exception $e){
-            # gestion d'exception sur la chaine de connection PDO
+        } catch(\Exception $e) {
 
-            if($cb !== null)
-            {
-                # is elle n'est pas null, execution de la fonction de rappel
+            # Gestion d'exception sur la chaine de connection PDO
+
+            if($cb !== null) {
+                # Is elle n'est pas null, execution de la fonction de rappel
                 call_user_func($cb, $e);
+
             }
 
             return null;
 
         }
 
-        if($cb !== null)
-        {
-            # is elle n'est pas null, execution de la fonction de rappel
+        if($cb !== null) {
+
+            # Is elle n'est pas null, execution de la fonction de rappel
             call_user_func($cb, null);
+
         }
 
         # Retour de l'objet PDO
         return $bdd;
+
+    }
+
+    /**
+    * readConfigurationFile, permet de lire les informations de configuration
+    * @param string $dir, le repertoir parent
+    * @return strting $r, la chaine dsn
+    */
+    private static function readConfigurationFile($dir) {
+
+       if(is_dir("{$dir}/.config")) {
+
+            $r = base64_decode(file_get_contents("{$dir}/../.config/.dsn"));
+            
+        } else {
+
+            $r = null;
+
+        }
+
+
+        return $r;
+    }
+
+    /**
+    * errorListener, permet de lancer des erreurs en cas de chaine dsn non valide ou inexistante
+    * @param string $r, la chaine de connection
+    * @param callable $cb, fonction de rappelle, facultative
+    */
+    private static function errorListener($r, $cb) {
+
+        if($r === null) {
+
+            if($cb !== null) {
+
+                call_user_func($cb, new DooException("Dsn-not-created"));
+                die();
+
+            } else {
+
+                throw new DooException("Dsn-not-created");
+
+            }
+
+        }
+
+    }
+
+    /**
+    * makeDsn, permet d'ordonner le dsn
+    * @param $r
+    * @return object
+    */
+    private static function makeDsn($r) {
+
+        $r = preg_replace("#[A-Z]+=|\n#", "", $r);
+        $r = parse_url($r);
+        $d = new \StdClass;
+
+        foreach(["scheme", "user", "host", "path", "pass", "port"] as $key => $value) {
+
+            if(isset($r[$value])) {
+
+                $d->{$value} = trim($r[$value], "/");
+            
+            } else {
+
+                $d->{$value} = '';
+
+            }
+
+        }
+
+        return (object) [
+
+            "dsn" => $d->scheme . ":host=" . $d->host . "" . ($d->port !== '' ? ":". $d->port: "") . ";dbname=". $d->path,
+            "user" => $d->user,
+            "pass" => $d->pass
+
+        ];
 
     }
 

@@ -25,6 +25,9 @@ class Doo extends DooData{
     # configuration du jeu de caractere
     private static $charset = null;
 
+    # mail
+    public static $mail = null;
+
     # Le mode de recuperation de des
     private static $modeDeRecuperationDeDonnee = \PDO::FETCH_OBJ;
 
@@ -58,7 +61,27 @@ class Doo extends DooData{
     public static function init($dsn = null, $cb = null)
     {
 
-        self::$bdd = Doodb::connection($dsn, $cb);
+        if($dsn !== null)
+        {
+            if(!is_string($dsn))
+            {
+                $cb = $dsn;
+            }
+            else
+            {
+                if($cb !== null)
+                {
+
+                    self::$bdd = Doo::connection($dsn, $cb);
+
+                }
+                else
+                {
+                    self::$bdd = Doodb::connection($cb);
+                }
+            }
+        }
+
 
         if(self::$bdd !== null)
         {
@@ -253,7 +276,7 @@ class Doo extends DooData{
     * @param string where: where condition, { id = 2 and }
     */
 
-    public static function update($table, $fields, $cb = null, $where = null)
+    public static function update($table, $fields, $cb == null, $where = null)
     {
         self::doException($cb, "Executez en premier cette fonction, Doo::init(dsn, cb). <br/> ou verifiez cette fonction.");
 
@@ -597,9 +620,9 @@ class Doo extends DooData{
      */
     public static function mail() {
 
-        if(self::$mail === null) {
+        if(self$mail === null) {
 
-            self::$mail = new Doomail();
+            self::$mail new Doomail();
 
         }
 
@@ -643,3 +666,4 @@ class Doo extends DooData{
     }
 
 }
+t
