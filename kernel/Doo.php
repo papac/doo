@@ -50,13 +50,12 @@ class Doo extends DooData{
     * e.g mysql://username:password@hostname:port/dbname
     */
 
-    public function __construct()
-    {
+    public function __construct() {
+
         self::$mail = new Doomail();
     }
 
-    public static function init($dsn = null, $cb = null)
-    {
+    public static function init($dsn = null, $cb = null) {
 
         self::$bdd = Doodb::connection($dsn, $cb);
 
@@ -81,8 +80,7 @@ class Doo extends DooData{
     * @return mixed
     */
 
-    public static function setCharset($charset, $cb = null)
-    {
+    public static function setCharset($charset, $cb = null) {
 
         if(!in_array($charset, ["UTF8", "ISO-8859"])){
 
@@ -122,8 +120,7 @@ class Doo extends DooData{
     * setFetchMode, fonction permettant de redefinir la methode de recuperation des information
     * @param int: PDO fecth constant
     */
-    public static function setFetchMode($pdoFetchMode)
-    {
+    public static function setFetchMode($pdoFetchMode) {
 
         self::$modeDeRecuperationDeDonnee = (int) $pdoFetchMode;
 
@@ -141,8 +138,7 @@ class Doo extends DooData{
     * @throws \Exception
     */
 
-    public static function select($table, $fields, $cb, $where = null, $order = false, $limit = null)
-    {
+    public static function select($table, $fields, $cb, $where = null, $order = false, $limit = null) {
 
         self::doException($cb, "Executez en premier cette commande, Doo::init(dsn, cb). ");
 
@@ -154,8 +150,7 @@ class Doo extends DooData{
 
 
         # Construction d'un SQL statement personnalisable
-        if($where !== null && is_array($where))
-        {
+        if($where !== null && is_array($where)) {
 
             $c = count($where);
 
@@ -212,15 +207,13 @@ class Doo extends DooData{
 
         }
 
-        if($limit !== null)
-        {
+        if($limit !== null) {
 
             $query .= " LIMIT " . $limit;
 
         }
 
-        if(self::$charset !== null)
-        {
+        if(self::$charset !== null) {
 
             self::$bdd->exec("SET NAMES " . self::$charset);
 
@@ -231,13 +224,11 @@ class Doo extends DooData{
 
         $err = self::getError(self::$bdd->errorInfo(), $query);
 
-        if(is_bool($req))
-        {
+        if(is_bool($req)) {
 
             call_user_func_array($cb , [$err, []]);
 
-        }else
-        {
+        } else {
 
             call_user_func_array($cb, [$err, $req->fetchAll(self::$modeDeRecuperationDeDonnee)]);
 
@@ -253,8 +244,8 @@ class Doo extends DooData{
     * @param string where: where condition, { id = 2 and }
     */
 
-    public static function update($table, $fields, $cb = null, $where = null)
-    {
+    public static function update($table, $fields, $cb = null, $where = null) {
+
         self::doException($cb, "Executez en premier cette fonction, Doo::init(dsn, cb). <br/> ou verifiez cette fonction.");
 
         if($cb !== null) {
@@ -306,8 +297,7 @@ class Doo extends DooData{
     * @param function cb: fonction de recuperation des erreurs et des donnees
     */
 
-    public static function insert($table, $fields, $cb)
-    {
+    public static function insert($table, $fields, $cb) {
 
         self::doException($cb, "Executez en premier cette commande, Doo::init(dsn, cb). ");
 
@@ -315,8 +305,7 @@ class Doo extends DooData{
 
         $i = 0;
 
-        foreach ($fields as $key => $value)
-        {
+        foreach ($fields as $key => $value) {
 
             $query .= $i > 0 ? ", " : "";
             $query .=  "{$key} = :{$key}";
@@ -326,8 +315,7 @@ class Doo extends DooData{
 
         $req = self::$bdd->prepare($query);
 
-        foreach($fields as $key => $value)
-        {
+        foreach($fields as $key => $value) {
 
             $req->bindValue("{$key}", $value, is_int($value) ? \PDO::PARAM_INT : \PDO::PARAM_STR);
 
@@ -347,8 +335,7 @@ class Doo extends DooData{
     * @param function cb: fonction de recuperation des erreurs et des donnees
     */
 
-    public static function delete($table, $cb = null, $where = null)
-    {
+    public static function delete($table, $cb = null, $where = null) {
 
         doException($cb, "Executez en premier cette commande, Doo::init(dsn, cb). ");
 
@@ -375,9 +362,10 @@ class Doo extends DooData{
 
         $req->execute();
 
-        if($cb !== null)
-        {
+        if($cb !== null) {
+
             call_user_func($cb, [self::getError(self::$bdd->errorInfo(), $query)]);
+
         }
 
     }
@@ -391,52 +379,43 @@ class Doo extends DooData{
     * @param fonction[$cb = null], fonction de rappel pour recuperer les erreurs.
     */
 
-    public static function uploadFile($file, array $extension, $cb = null, $hash = null)
-    {
+    public static function uploadFile($file, array $extension, $cb = null, $hash = null) {
+
         $file = (object) $file;
-        if(is_array($extension))
-        {
+
+        if(is_array($extension)) {
 
             $extensionValide = $extension;
 
-        }
-        else
-        {
+        } else {
 
             $cb = $extension;
 
         }
 
         # Si le fichier est bien dans le repertoir tmp de PHP
-        if(is_uploaded_file($file->tmp_name))
-        {
+        if(is_uploaded_file($file->tmp_name)) {
 
-            if(!is_dir(self::$uploadDir))
-            {
+            if(!is_dir(self::$uploadDir)) {
 
                 mkdir(self::$uploadDir, 0777);
 
             }
 
             # Si le fichier est bien uploader, avec aucune error
-            if($file->error === 0)
-            {
+            if($file->error === 0) {
 
-                if($file->size <= self::$fileSize)
-                {
+                if($file->size <= self::$fileSize) {
 
                     $pathInfo = (object) pathinfo($file->name);
 
-                    if(in_array($pathInfo->extension, $extensionValide))
-                    {
+                    if(in_array($pathInfo->extension, $extensionValide)) {
 
-                        if($hash !== null)
-                        {
+                        if($hash !== null) {
 
                             $filename = hash($hash, uniqid(rand(null, true)));
 
-                        }else
-                        {
+                        } else {
 
                             $filename = $pathInfo->filename;
 
@@ -452,9 +431,7 @@ class Doo extends DooData{
                             "message" => self::surround('File Uploaded.', '#6DD37C')
                         ];
 
-                    }
-                    else
-                    {
+                    } else {
 
                         # Status, extension du fichier
                         $status = [
@@ -464,9 +441,7 @@ class Doo extends DooData{
 
                     }
 
-                }
-                else
-                {
+                } else {
 
                     # Status, la taille est invalide
                     $status = [
@@ -476,9 +451,7 @@ class Doo extends DooData{
 
                 }
 
-            }
-            else
-            {
+            } else {
 
                 # Status, fichier erroné.
                 $status = [
@@ -488,9 +461,7 @@ class Doo extends DooData{
 
             }
 
-        }
-        else
-        {
+        } else {
 
             # Status, fichier non uploadé
             $status = [
@@ -500,8 +471,7 @@ class Doo extends DooData{
 
         }
 
-        if($cb !== null)
-        {
+        if($cb !== null) {
 
             call_user_func_array($cb, [(object) $status, isset($filename) ? $filename : null, isset($ext) ? $ext : null]);
 
@@ -513,8 +483,7 @@ class Doo extends DooData{
     * setUploadedDir, fonction permettant de redefinir le repertoir d'upload
     * @param string:path, le chemin du dossier de l'upload
     */
-    public static function setUploadedDir($path)
-    {
+    public static function setUploadedDir($path) {
 
         if(is_string($path)) {
 
@@ -536,8 +505,7 @@ class Doo extends DooData{
     * @param string, la requete sur laquelle il y a eu l'erreur
     * @return object, un objet contenant les informations formates de l'erreur
     */
-    private static function getError($err, $query)
-    {
+    private static function getError($err, $query) {
 
         $orign = preg_replace("#'[a-zA-Z_-]+\.#", "", $err[2]);
 
@@ -558,8 +526,7 @@ class Doo extends DooData{
     * @param int, $errCode
     * @return string $message, formater
     */
-    private static function surround($message, $errCode = null)
-    {
+    private static function surround($message, $errCode = null) {
 
         if($errCode === self::ERROR) {
 
@@ -625,16 +592,22 @@ class Doo extends DooData{
 
     }
 
+    /**
+    * doException, fonction permet de lancer un exception en cas de non initialisation de doo
+    * @param callable $cb
+    * @param string $message
+    */
     private static function doException($cb = null, $message) {
 
         if(self::$bdd === null) {
 
             $err = new \Exception(self::surround($message, isset(func_get_args()[2]) ? func_get_args()[2] : self::ERROR));
 
-            if($cb !== null)
-            {
+            if($cb !== null) {
+
                 call_user_func_array($cb, [$err, null]);
-                die();
+                exit;
+
             }
 
             throw $err;

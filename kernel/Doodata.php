@@ -15,8 +15,8 @@ namespace Doo;
 abstract class Doodata extends Doodb {
 
 	private static $part = "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
-	public static $mode = MCRYPT_MODE_CBC;
-	public static $key = 'e10481ddd02acf366f57c60819877a32';
+	private static $mode = MCRYPT_MODE_CBC;
+	private static $key = 'e10481ddd02acf366f57c60819877a32';
 	private static $dataLen  = null;
 
 	/**
@@ -27,14 +27,15 @@ abstract class Doodata extends Doodb {
 	* @return string, resultat
 	*/
 
-	protected static function decrypto($data, $cb = null) {
+	public static function decrypto($data, $cb = null) {
 
 		$decode = base64_decode($data);
 		$r = mcrypt_decrypt(MCRYPT_RIJNDAEL_128, self::$key, $decode, self::$mode, self::$part);
 
-		if($cb !== null)
-		{
+		if($cb !== null) {
+
 			call_user_func($cb, (substr($r, 0, self::$dataLen)));
+
 		}
 
 		return $r;
@@ -49,16 +50,16 @@ abstract class Doodata extends Doodb {
 	* @param function, une fonction de callback.
 	* @return string, resultat
 	*/
-	protected static function crypto($data, $cb = null)
-	{
+	public static function crypto($data, $cb = null) {
 
 		# On recupere la taille de la donnee.
 		self::$dataLen = strlen($data);
 		$r = base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_128, self::$key, $data, self::$mode, self::$part));
 
-		if($cb !== null)
-		{
+		if($cb !== null) {
+
 			call_user_func($cb, $r);
+
 		}
 
 		return $r;

@@ -1,58 +1,80 @@
 #!/usr/bin/evn php
 <?php
 
-	define("PROJECT_CREATED", 3);
-    define("APP_NAME_NOT_VALIDE", 4);
-    define("APP_EXISTS", 5);
-    define("APP_NOT_GIVEN", 7);
-
     define("DSN_NOT_VALIDE", 1);
     define("DSN_CREATED", 2);
     define("DSN_CONF_EXISTS", 6);
 
- 	switch($argv[1]) {
+    //connectionDB();
 
-        case "dsn":
+    if(!isset($argv[1])) {
 
-            if(!empty($argv[2]) && $argv[2] == "--remove") {
+        helper();
 
-                if(!is_dir("Doo")) {
+    }
 
-                    die("You aren't in your project folder.\n Do cd MyAppFolder and execute command \n\tphp artisan dsn Your-dsn");
-                
-                }
+    $cmd = $argv[1];
 
-                $status = @shell_exec("rm -r ./.config 2> ./.log");
+ 	if($cmd == "--dsn" || $cmd == "-d") {
 
-                if(is_null($status)) {
+        if(!empty($argv[2]) && $argv[2] == "--remove") {
 
-                    die("Dsn-config not-found.\n");
+            if(!is_dir("Doo")) {
 
-                }
-
-                die("Your-dsn is removed.\n");
-
-            } else if(isset($argv[2]) && $argv[2] != "--remove"  && !isset($argv[3])) {
-
-                createDsn($argv[2], 'new', ".");
-                die("Dsn-config created.\n");
-            
-            } else if (isset($argv[2]) && isset($argv[3]) && $argv[3] == "--update") {
-
-                createDsn($argv[2], 'update', ".");
-                die("Up-to-date dsn success.\n");
-
-            } else {
-
-                die("Fatal error due to not value given at dsn command\nUsage : artisan dsn mysql://username@localhost/database\n\n\t--update To update Your dsn\n");
+                die("You aren't in your project folder.\n Do cd MyAppFolder and execute command \n\tphp artisan dsn Your-dsn");
             
             }
 
-            break;
+            $status = @shell_exec("rm -r ./.config 2> ./.log");
+
+            if(is_null($status)) {
+
+                die("Dsn-config not-found.\n");
+
+            }
+
+            die("Your-dsn is removed.\n");
+
+            createDsn($argv[2], 'new', ".");
+            die("Dsn-config created.\n");
+        
+        } else if (isset($argv[2]) && isset($argv[3]) && $argv[3] == "--update") {
+
+            createDsn($argv[2], 'update', ".");
+            die("Up-to-date dsn success.\n");
+
+        } else {
+
+            die("You not give --dsn value.\n\tUsgae doo init projet-name --dsn Your-Dsn\n\te.g mysql://root:password@localhost:3306/mydatabase\n");
+
+        }
+
+    } else if($cmd == "--create-table" || $cmd == "-c") {
+
+        if(isset($argv[3]) && $argv[3] == "--desc") {
+
+            $query = "CREATE TABLE " . $argv[2] . " (" . makeTableDescribe($argv[4]) . ")";
+            $db = connectionDB();
+
+            $stats = $db->exec($query);
+
+            if($stats === 0) {
+                die("table exist ...\n");
+            } else { 
+                die("table created successfule.\n");
+            }
+
+
+        }
+
+    } else if($cmd == "--insert-data" || $cmd == "-i") {
+
+
+
     }
 
 	function verifyDsn($dns) {
-
+        
 	    return preg_match("#(pgsql|mysql|sqlite)://[\S]+:?([\S]+)?@[\S]:?([\S]+)/[\w\d]+#", $dns);
 
 	}
@@ -63,7 +85,7 @@
 
 	        if(file_exists("${path}/.conf/.dsn")) {
 
-	            file_put_contents("${path}/.config/.dsn", "DNS=" . base64_encode($dsn));
+	            file_put_contents("${path}/.config/.dsn", "{*" . base64_encode($dsn) . "-}");
 
 	        } else {
 
@@ -85,27 +107,178 @@
 
 	        mkdir("{$path}/.config", 0777);
 	        touch("{$path}/.config/.dsn");
-	        file_put_contents("{$path}/.config/.dsn", base64_encode($dsn));
+	        file_put_contents("{$path}/.config/.dsn", "{*" . base64_encode($dsn) . "-}");
 	    }
 	}
 
 	function makeMessage($errno = null) {
 
-    if($errno === DSN_NOT_VALIDE) {
+        if($errno === DSN_NOT_VALIDE) {
 
-        die("Your-Dsn is not valide.\n\tUsage dsn e.g mysql://username[:password]@hostname[:port]/database");
+            die("Your-Dsn is not valide.\n\tUsage dsn e.g mysql://username[:password]@hostname[:port]/database");
 
-    } else if($errno === APP_NAME_NOT_VALIDE) {
+        }else if($errno === DSN_CONF_EXISTS) {
 
-        die("Project name is not valable");
+            die("A other Dsn-config exist, so update it or remove it.\nUsage doo dsn yourdsn --update, to update\n");
 
-    } else if($errno === DSN_CONF_EXISTS) {
+        }
+    }
 
-        die("A other Dsn-config exist, so update it or remove it.\nUsage doo dsn yourdsn --update, to update\n");
+    function helper() {
 
-    } else if($errno === APP_EXISTS) {
-
-        die("Project exsits in this folder.\n\tUsage doo rename /lost/path /new/path app\n");
+        die("Usage: php artisan [--dsn|--create-table|--insert-data] parameter\n\n\t--dsn -d  configuration de dsn\n\t--create-table -c configuration your db\n\t--insert-data -i insert data in table for your test\n\n");
 
     }
-}
+
+
+    function connectionDB() {
+    
+        if(!is_file(".config/.dsn")) {
+            die("Dsn not configured, please execute this command php artisan --dsn your-dns\n");
+        }
+
+        $r = file_get_contents(".config/.dsn");
+
+        $dsn = makeDsn(base64_decode($r));
+        try {
+            $db = new PDO($dsn->dsn, $dsn->user, $dsn->pass);
+        } catch(Exception $e) {
+          die("Fail to connect mysql server, please verify your dsn.\n");
+        }
+
+        return $db;
+    }
+    
+    function makeDsn($r) {
+
+        $r = str_replace("{*", "", str_replace("-}", "", $r));
+        $r = parse_url($r);
+        $d = new \StdClass;
+
+        foreach(["scheme", "user", "host", "path", "pass", "port"] as $key => $value) {
+
+            if(isset($r[$value])) {
+
+                $d->{$value} = trim($r[$value], "/");
+            
+            } else {
+
+                $d->{$value} = '';
+
+            }
+
+        }
+
+        return (object) [
+
+            "dsn" => $d->scheme . ":host=" . $d->host . "" . ($d->port !== '' ? ":". $d->port: "") . ";dbname=". $d->path,
+            "user" => $d->user,
+            "pass" => $d->pass
+
+        ];
+
+    }
+
+    function makeTableDescribe($desc) {
+
+        $type = [
+            "var" => "VARCHAR",
+            "int" => "INT",
+            "smll" => "SMALL",
+            "tyn" => "TINYINT",
+            "date" => "DATE",
+            "dtime" => "DATETIME",
+            "flt" => "FLOAT"
+        ];
+
+        $extra = [
+            "nn" => "NOT NULL",
+            "null" => "NULL",
+            "ai" => "AUTO_INCREMENT",
+            "df" => "DEFAULT",
+            "pk" => "PRIMARY KEY"
+        ];
+
+        $desc = explode(",", $desc);
+
+        foreach($desc as $key => $value) {
+
+            $r = explode(":", $value);
+
+            $fields[$key]["field"] = $r[0];
+            $fields[$key]["type"] = explode("=", $r[1], 2);
+
+            if(isset($r[2])) {
+
+                $fields[$key]["extra1"] = explode("=", $r[2], 2);
+
+                if(isset($r[3])) {
+
+                    $fields[$key]["extra2"] = explode("=", $r[3], 2);
+
+                    if(isset($r[4])) {
+
+                        $fields[$key]["extra3"] = explode("=", $r[4], 2);
+
+                    }
+
+                }
+
+            }
+
+        }
+
+        $r = "";
+        $i = 0;
+        foreach ($fields as $key => $value) {
+            
+            $r .= ($i > 0 ? ", " : "") . $value["field"] . " " . $type[$value["type"][0]];
+
+            if(count($value["type"]) > 1) {
+
+                $r .= "(" . $value["type"][1] . ")";
+
+            }
+
+            if(isset($value["extra1"])) {
+
+                 $r .= " " . $extra[$value["extra1"][0]] . "";
+
+                if(count($value["extra1"]) > 1) {
+
+                    $r .= $value["extra1"][1];
+                
+                }
+
+            }
+
+            if(isset($value["extra2"])) {
+
+                 $r .= " " . $extra[$value["extra2"][0]] . "";
+
+                if(count($value["extra2"]) > 1) {
+
+                    $r .= " " . $value["extra2"][1];
+                
+                }
+
+            }
+
+            if(isset($value["extra3"])) {
+
+                 $r .= " " . $extra[$value["extra3"][0]] . "";
+
+                if(count($value["extra3"]) > 1) {
+
+                    $r .= " " . $value["extra3"][1];
+                
+                }
+
+            }
+ 
+            $i++;
+
+        }
+
+        return $r;
+    }
