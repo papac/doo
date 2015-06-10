@@ -54,6 +54,9 @@
         if(isset($argv[3]) && $argv[3] == "--desc") {
 
             $query = "CREATE TABLE " . $argv[2] . " (" . makeTableDescribe($argv[4]) . ")";
+            
+            var_dump($query);
+
             $db = connectionDB();
 
             $stats = $db->exec($query);
