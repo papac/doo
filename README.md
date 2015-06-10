@@ -36,7 +36,7 @@ lien
         }
     });
 ```
-#### Selectionner dans données.
+#### Selectionner des données.
 ```php
 
     # Serveur de base de donnée déjà connecté.
